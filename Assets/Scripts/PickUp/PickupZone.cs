@@ -12,9 +12,14 @@ public class PickupZone : MonoBehaviour
 
     void Update()
     {
-        if (pickable == null || pickable.isBeingCarried) return;
+        if (pickable == null) return;
+
+        // Prevent picking multiple objects at the same time
+        if (pickable.isBeingCarried) return;
+        if (PickableObject.objectAlreadyCarried) return;
 
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
         float minDist = Mathf.Infinity;
         Transform closest = null;
 
@@ -22,10 +27,12 @@ public class PickupZone : MonoBehaviour
         {
             Vector3 playerPos = p.transform.position;
             Vector3 objectPos = transform.position;
+
             playerPos.y = 0;
             objectPos.y = 0;
+
             float dist = Vector3.Distance(playerPos, objectPos);
-            Debug.Log("Distancia XZ a " + p.name + ": " + dist);
+
             if (dist < minDist)
             {
                 minDist = dist;
@@ -35,7 +42,6 @@ public class PickupZone : MonoBehaviour
 
         if (closest != null && minDist < pickupRadius)
         {
-            Debug.Log("Cogiendo objeto!");
             pickable.PickUp(closest);
         }
     }
