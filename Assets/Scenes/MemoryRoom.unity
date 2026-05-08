@@ -1166,6 +1166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &155092818 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7958227791878072094, guid: 761e24fa02fc69e4e949b9f5547dc4e2, type: 3}
@@ -1264,6 +1265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &176928805
 GameObject:
   m_ObjectHideFlags: 0
@@ -3210,6 +3212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &415727058
 GameObject:
   m_ObjectHideFlags: 0
@@ -4082,6 +4085,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &501404258
 GameObject:
   m_ObjectHideFlags: 0
@@ -4614,7 +4618,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &617292971
 Transform:
   m_ObjectHideFlags: 0
@@ -4816,6 +4820,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &638532938
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5171,7 +5176,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &723791730
 Transform:
   m_ObjectHideFlags: 0
@@ -5311,6 +5316,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &751314937
 GameObject:
   m_ObjectHideFlags: 0
@@ -5544,6 +5550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &809601805
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6233,6 +6240,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &876187462
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7660,6 +7668,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1050402256
 GameObject:
   m_ObjectHideFlags: 0
@@ -8232,6 +8241,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1232370072
 GameObject:
   m_ObjectHideFlags: 0
@@ -8388,6 +8398,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1271944586
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9164,6 +9175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1339729023
 GameObject:
   m_ObjectHideFlags: 0
@@ -9741,6 +9753,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1402916991
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9834,6 +9847,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1415434092
 GameObject:
   m_ObjectHideFlags: 0
@@ -10588,6 +10602,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1477244925
 GameObject:
   m_ObjectHideFlags: 0
@@ -11096,6 +11111,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1519443228
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11195,6 +11211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1529547764
 GameObject:
   m_ObjectHideFlags: 0
@@ -12541,6 +12558,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1750486094
 GameObject:
   m_ObjectHideFlags: 0
@@ -12925,6 +12943,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1791344187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13018,6 +13037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1814012754
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13323,6 +13343,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1867402653
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13417,6 +13438,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1873869354
 GameObject:
   m_ObjectHideFlags: 0
@@ -14134,6 +14156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1937471550
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14438,6 +14461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &1957087965
 GameObject:
   m_ObjectHideFlags: 0
@@ -14669,6 +14693,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1982628447
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14763,6 +14788,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1984490033
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14867,6 +14893,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 1
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1986737960
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15372,6 +15399,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &2045684388
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15687,6 +15715,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &2072517567
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16198,6 +16227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1 &2115284981
 GameObject:
   m_ObjectHideFlags: 0
@@ -16284,6 +16314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBeingCarried: 0
   dropHeight: 0.5
+  pickupCooldownAfterDrop: 1
 --- !u!1001 &1043633678458324654
 PrefabInstance:
   m_ObjectHideFlags: 0
