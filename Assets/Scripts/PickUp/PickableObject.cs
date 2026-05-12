@@ -16,6 +16,9 @@ public class PickableObject : MonoBehaviour
     // Time in seconds during which pickup is disabled after dropping
     public float pickupCooldownAfterDrop = 1f;
 
+    public Vector3 carryLocalPosition = new Vector3(0f, 1.5f, 0f);
+    public Vector3 carryLocalRotation = Vector3.zero;
+
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     private Transform carrier;
@@ -30,8 +33,11 @@ public class PickableObject : MonoBehaviour
     {
         if (!isBeingCarried || carrier == null) return;
 
+        transform.localPosition = carryLocalPosition;
+        transform.localRotation = Quaternion.Euler(carryLocalRotation);
+
         // TEMPORARY DEBUG CONTROL FOR EDITOR TESTING
-        // We have to remove this in the final VR version.
+        // This must be removed in the final VR version.
         // Because final drop mechanic should be based on tracker height.
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
@@ -61,9 +67,9 @@ public class PickableObject : MonoBehaviour
 
         carrier = player;
 
-        transform.SetParent(player);
-        transform.localPosition = new Vector3(0f, 1.5f, 0f);
-        transform.localRotation = Quaternion.identity;
+        transform.SetParent(player, true);
+        transform.localPosition = carryLocalPosition;
+        transform.localRotation = Quaternion.Euler(carryLocalRotation);
     }
 
     public void Drop()
@@ -76,9 +82,9 @@ public class PickableObject : MonoBehaviour
         // Start cooldown after dropping the object
         globalPickupBlockedUntil = Time.time + pickupCooldownAfterDrop;
 
-        carrier = null;
+        transform.SetParent(null, true);
 
-        transform.SetParent(null);
+        carrier = null;
     }
 
     public void ReturnToOriginalPosition()

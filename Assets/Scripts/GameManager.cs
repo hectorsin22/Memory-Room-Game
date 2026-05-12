@@ -163,6 +163,15 @@ public class GameManager : MonoBehaviour
             );
 
             obj.name = prefab.name;
+
+            Transform pickupReference = FindPickupObjectByID(objectID);
+
+            if (pickupReference != null)
+            {
+                obj.transform.rotation = pickupReference.rotation;
+                obj.transform.localScale = pickupReference.localScale;
+            }
+
             spawnedMemoryObjects.Add(obj);
 
             availableSpawns.RemoveAt(spawnIndex);
@@ -177,6 +186,19 @@ public class GameManager : MonoBehaviour
 
             if (id != null && id.objectID == objectID)
                 return prefab;
+        }
+
+        return null;
+    }
+
+    Transform FindPickupObjectByID(string objectID)
+    {
+        foreach (Transform child in pickupObjectsParent)
+        {
+            MemoryObjectID id = child.GetComponent<MemoryObjectID>();
+
+            if (id != null && id.objectID == objectID)
+                return child;
         }
 
         return null;
