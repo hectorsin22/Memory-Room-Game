@@ -11667,6 +11667,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 715086494587921598}
     - target: {fileID: 7770367138183300152, guid: 5ddc693fe3104084db0ff909aa891179, type: 3}
+      propertyPath: openSound
+      value: 
+      objectReference: {fileID: 8300000, guid: eaf049e7b10236f41902245fbaae192c, type: 3}
+    - target: {fileID: 7770367138183300152, guid: 5ddc693fe3104084db0ff909aa891179, type: 3}
+      propertyPath: closeSound
+      value: 
+      objectReference: {fileID: 8300000, guid: b479d91b56dd2014da172f195c14c0d1, type: 3}
+    - target: {fileID: 7770367138183300152, guid: 5ddc693fe3104084db0ff909aa891179, type: 3}
       propertyPath: openRotation.y
       value: 180
       objectReference: {fileID: 0}

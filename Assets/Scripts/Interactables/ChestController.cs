@@ -8,13 +8,16 @@ public class ChestController : MonoBehaviour
     public Vector3 openRotation;
 
     public AudioSource audioSource;
+    public AudioClip openSound;
+    public AudioClip closeSound;
 
     public void OpenChestInstant()
     {
         lidPivot.localRotation = Quaternion.Euler(openRotation);
 
-        if (audioSource != null)
+        if (audioSource != null && openSound != null)
         {
+            audioSource.clip = openSound;
             audioSource.Play();
         }
     }
@@ -22,5 +25,11 @@ public class ChestController : MonoBehaviour
     public void CloseChest()
     {
         lidPivot.localRotation = Quaternion.Euler(closedRotation);
+
+        if (audioSource != null && closeSound != null)
+        {
+            audioSource.clip = closeSound;
+            audioSource.Play();
+        }
     }
 }
