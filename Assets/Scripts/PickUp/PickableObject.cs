@@ -16,22 +16,47 @@ public class PickableObject : MonoBehaviour
     // Time in seconds during which pickup is disabled after dropping
     public float pickupCooldownAfterDrop = 1f;
 
+    public Vector3 carryLocalPosition = new Vector3(0f, 1.5f, 0f);
+    public Vector3 carryLocalRotation = Vector3.zero;
+
+    public bool centerObjectOnPlayer = true;
+
+    public bool keepOriginalRotationWhenCarried = true;
+
     private Vector3 originalPosition;
     private Quaternion originalRotation;
+    private Transform originalParent;
     private Transform carrier;
 
     void Start()
     {
         originalPosition = transform.position;
         originalRotation = transform.rotation;
+        originalParent = transform.parent;
     }
 
     void Update()
     {
         if (!isBeingCarried || carrier == null) return;
 
+        //transform.localRotation = Quaternion.Euler(carryLocalRotation);
+
+        if (!keepOriginalRotationWhenCarried)
+        {
+            transform.localRotation = Quaternion.Euler(carryLocalRotation);
+        }
+
+        if (centerObjectOnPlayer)
+        {
+            CenterObjectOnCarrier();
+        }
+        else
+        {
+            transform.localPosition = carryLocalPosition;
+        }
+
         // TEMPORARY DEBUG CONTROL FOR EDITOR TESTING
-        // We have to remove this in the final VR version.
+        // This must be removed in the final VR version.
         // Because final drop mechanic should be based on tracker height.
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
@@ -61,9 +86,43 @@ public class PickableObject : MonoBehaviour
 
         carrier = player;
 
-        transform.SetParent(player);
-        transform.localPosition = new Vector3(0f, 1.5f, 0f);
-        transform.localRotation = Quaternion.identity;
+        transform.SetParent(player, true);
+
+        if (!keepOriginalRotationWhenCarried)
+        {
+            transform.localRotation = Quaternion.Euler(carryLocalRotation);
+        }
+        //transform.localRotation = Quaternion.Euler(carryLocalRotation);
+
+        if (centerObjectOnPlayer)
+            CenterObjectOnCarrier();
+        else
+            transform.localPosition = carryLocalPosition;
+    }
+
+    private void CenterObjectOnCarrier()
+    {
+        Vector3 targetWorldPosition = carrier.TransformPoint(carryLocalPosition);
+
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+
+        if (renderers.Length == 0)
+        {
+            transform.localPosition = carryLocalPosition;
+            return;
+        }
+
+        Bounds bounds = renderers[0].bounds;
+
+        foreach (Renderer renderer in renderers)
+        {
+            bounds.Encapsulate(renderer.bounds);
+        }
+
+        Vector3 visualCenter = bounds.center;
+        Vector3 correction = targetWorldPosition - visualCenter;
+
+        transform.position += correction;
     }
 
     public void Drop()
@@ -76,9 +135,24 @@ public class PickableObject : MonoBehaviour
         // Start cooldown after dropping the object
         globalPickupBlockedUntil = Time.time + pickupCooldownAfterDrop;
 
-        carrier = null;
+        transform.SetParent(originalParent, true);
 
-        transform.SetParent(null);
+        carrier = null;
+    }
+
+    public void ForceDisappear()
+    {
+        if (isBeingCarried)
+        {
+            isBeingCarried = false;
+            objectAlreadyCarried = false;
+            carrier = null;
+        }
+
+        transform.SetParent(originalParent, true);
+        transform.position = originalPosition;
+        transform.rotation = originalRotation;
+        gameObject.SetActive(false);
     }
 
     public void ReturnToOriginalPosition()

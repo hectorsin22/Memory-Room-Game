@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5556003683571691727}
   - component: {fileID: 8518999407878305659}
   - component: {fileID: 8522733209428711869}
+  - component: {fileID: -5190898429001724164}
   m_Layer: 0
   m_Name: Prop_ToyCar_01 (1)
   m_TagString: Untagged
@@ -126,6 +127,19 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &-5190898429001724164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847778792113651141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_ToyCar_01 (1)
 --- !u!1 &7920130298798187746
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6817512900465209654}
   - component: {fileID: 4047245906051240760}
   - component: {fileID: 8047668881868446327}
+  - component: {fileID: 4410375097756282919}
   m_Layer: 0
   m_Name: Prop_ShapeSortingBlock_Polygon_01
   m_TagString: Untagged
@@ -125,6 +126,19 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &4410375097756282919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334980066406209967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_ShapeSortingBlock_Polygon_01
 --- !u!1 &4636838897948973065
 GameObject:
   m_ObjectHideFlags: 0

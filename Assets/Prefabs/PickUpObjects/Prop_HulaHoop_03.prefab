@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8581597438996480766}
   - component: {fileID: 5301366134698210177}
   - component: {fileID: 3065982078057330601}
+  - component: {fileID: 1215989905160112555}
   m_Layer: 0
   m_Name: Prop_HulaHoop_03
   m_TagString: Untagged
@@ -103,6 +104,19 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &1215989905160112555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1438512100153664743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_HulaHoop_03
 --- !u!1 &8249231115806222027
 GameObject:
   m_ObjectHideFlags: 0

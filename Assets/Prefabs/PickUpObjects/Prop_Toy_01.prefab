@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2973619773568028478}
   - component: {fileID: 103224680066741886}
   - component: {fileID: 4178069956317668355}
+  - component: {fileID: 827698527919883901}
   m_Layer: 0
   m_Name: Prop_Toy_01
   m_TagString: Untagged
@@ -126,6 +127,19 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &827698527919883901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706614765224791424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_Toy_01
 --- !u!1 &6720364276623525860
 GameObject:
   m_ObjectHideFlags: 0
