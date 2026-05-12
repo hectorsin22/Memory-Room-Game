@@ -217,6 +217,13 @@ public class GameManager : MonoBehaviour
 
     void DisableAllPickupObjects()
     {
+        PickableObject[] allPickables = FindObjectsOfType<PickableObject>();
+
+        foreach (PickableObject pickable in allPickables)
+        {
+            pickable.ForceDisappear();
+        }
+
         foreach (Transform child in pickupObjectsParent)
         {
             child.gameObject.SetActive(false);
