@@ -80,6 +80,7 @@ GameObject:
   - component: {fileID: 4950503455684131907}
   - component: {fileID: 6010811153731356839}
   - component: {fileID: 1707593500261971692}
+  - component: {fileID: -3522599229469152268}
   m_Layer: 0
   m_Name: Prop_Ball_05
   m_TagString: Untagged
@@ -194,3 +195,16 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &-3522599229469152268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8826031244939101966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_Ball_05

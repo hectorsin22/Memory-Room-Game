@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5527178394269508737}
   - component: {fileID: 740027789612692408}
   - component: {fileID: 8991592193777401729}
+  - component: {fileID: 6138892515849714058}
   m_Layer: 0
   m_Name: Prop_TeddyBear_04
   m_TagString: Untagged
@@ -126,6 +127,19 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &6138892515849714058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4080172504665319441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_TeddyBear_04
 --- !u!1 &5907514863285700876
 GameObject:
   m_ObjectHideFlags: 0

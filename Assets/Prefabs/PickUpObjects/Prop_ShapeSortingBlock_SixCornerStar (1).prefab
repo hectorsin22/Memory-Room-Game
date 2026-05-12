@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3833980979330741522}
   - component: {fileID: 1755597849719480572}
   - component: {fileID: 4979649202798988613}
+  - component: {fileID: -6517402336209922227}
   m_Layer: 0
   m_Name: Prop_ShapeSortingBlock_SixCornerStar (1)
   m_TagString: Untagged
@@ -125,6 +126,19 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &-6517402336209922227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5481898463360061444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_ShapeSortingBlock_SixCornerStar (1)
 --- !u!1 &9214343684462074885
 GameObject:
   m_ObjectHideFlags: 0

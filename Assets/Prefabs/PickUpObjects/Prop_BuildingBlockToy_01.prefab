@@ -80,6 +80,7 @@ GameObject:
   - component: {fileID: 5087110635957136636}
   - component: {fileID: 1668743311578067101}
   - component: {fileID: 6709754999735853068}
+  - component: {fileID: 3767849112427957219}
   m_Layer: 0
   m_Name: Prop_BuildingBlockToy_01
   m_TagString: Untagged
@@ -192,3 +193,16 @@ MonoBehaviour:
   isBeingCarried: 0
   dropHeight: 0.5
   pickupCooldownAfterDrop: 1
+--- !u!114 &3767849112427957219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1519097747921391641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: Prop_BuildingBlockToy_01
