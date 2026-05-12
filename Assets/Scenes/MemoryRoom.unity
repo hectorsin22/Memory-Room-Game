@@ -230,6 +230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
+  currentRound: 1
   memoryObjectPrefabs:
   - {fileID: 6901694094200173185, guid: 78d05eb0998f4e24aa44b16eab72788c, type: 3}
   - {fileID: 6200514400933348093, guid: 389580c81b859774eb5ad4af4744bdff, type: 3}
@@ -300,14 +301,8 @@ MonoBehaviour:
   - {fileID: 1029931172}
   pickupObjectsParent: {fileID: 723791730}
   chest: {fileID: 7326891445249131158}
-  currentRound: 1
-  startingObjects: 3
-  objectsIncreasePerRound: 3
-  maxObjects: 20
-  startingMemorizeTime: 8
-  memorizeTimeDecreasePerRound: 1
-  minimumMemorizeTime: 4
-  reconstructionTime: 20
+  maxObjects: 12
+  maxImpostors: 5
   timeBetweenRounds: 3
 --- !u!4 &39433149 stripped
 Transform:
@@ -8415,6 +8410,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6709754999735853068, guid: 9a240d28247d11c4ab6642be40acf85c, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8597,6 +8596,10 @@ PrefabInstance:
     - target: {fileID: 4800889989840893016, guid: f48a4bf0798691141a33fb33c619bd1a, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4876288967420993426, guid: f48a4bf0798691141a33fb33c619bd1a, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8800,6 +8803,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 723791730}
     m_Modifications:
+    - target: {fileID: 3508600283720495167, guid: 2b2e266efb77b694f92834a47c6c57a1, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4757133458886048852, guid: 2b2e266efb77b694f92834a47c6c57a1, type: 3}
       propertyPath: m_Name
       value: Prop_HulaHoop_02
@@ -9363,6 +9370,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3065982078057330601, guid: d93bc97b417f3b7469a46c96281bd093, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3410721796972838861, guid: d93bc97b417f3b7469a46c96281bd093, type: 3}
       propertyPath: m_LocalPosition.x
       value: -31.39
@@ -9652,6 +9663,10 @@ PrefabInstance:
     - target: {fileID: 5594821644661709410, guid: 41bde83dc28c80742b2f7e70a7e7b247, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9040066092767969544, guid: 41bde83dc28c80742b2f7e70a7e7b247, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10012,6 +10027,10 @@ PrefabInstance:
     - target: {fileID: 7799507973224235988, guid: 493147b85692a1d4db1bac5a17fe44f8, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8885494928118057950, guid: 493147b85692a1d4db1bac5a17fe44f8, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10815,6 +10834,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 723791730}
     m_Modifications:
+    - target: {fileID: 380809704803614073, guid: 8d01185642bdd084c930b5f406e7e6f6, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4328619846311604484, guid: 8d01185642bdd084c930b5f406e7e6f6, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.38
@@ -10943,6 +10966,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 723791730}
     m_Modifications:
+    - target: {fileID: 2931792374299884867, guid: 9a6c5bb7352a99243b2b9ffa00cbdefd, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7797745396966036469, guid: 9a6c5bb7352a99243b2b9ffa00cbdefd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.8400002
@@ -11009,6 +11036,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 723791730}
     m_Modifications:
+    - target: {fileID: 1412726729453554784, guid: 222aa9c3ddc1a694b9cab3d716b3a752, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3538225327779445310, guid: 222aa9c3ddc1a694b9cab3d716b3a752, type: 3}
       propertyPath: m_Name
       value: Prop_ShapeSortingToy
@@ -11144,6 +11175,10 @@ PrefabInstance:
     - target: {fileID: 1706614765224791424, guid: 841b4e2acf5829c4986028116bd240a2, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4178069956317668355, guid: 841b4e2acf5829c4986028116bd240a2, type: 3}
+      propertyPath: pickupCooldownAfterDrop
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8055786635576559906, guid: 841b4e2acf5829c4986028116bd240a2, type: 3}
       propertyPath: m_LocalPosition.x

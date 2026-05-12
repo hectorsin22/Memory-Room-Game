@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
 
     [Header("State")]
     public GameState currentState;
+    public int currentRound = 1;
 
     [Header("Memory Objects")]
     public GameObject[] memoryObjectPrefabs;
@@ -26,17 +27,10 @@ public class GameManager : MonoBehaviour
     public ChestController chest;
 
     [Header("Difficulty")]
-    public int currentRound = 1;
-    public int startingObjects = 3;
-    public int objectsIncreasePerRound = 1;
-    public int maxObjects = 8;
-
-    public float startingMemorizeTime = 8f;
-    public float memorizeTimeDecreasePerRound = 1f;
-    public float minimumMemorizeTime = 4f;
+    public int maxObjects = 12;
+    public int maxImpostors = 5;
 
     [Header("Round Flow")]
-    public float reconstructionTime = 20f;
     public float timeBetweenRounds = 3f;
 
     private readonly List<GameObject> spawnedMemoryObjects = new List<GameObject>();
@@ -73,6 +67,16 @@ public class GameManager : MonoBehaviour
 
         int objectsThisRound = GetObjectsForCurrentRound();
         float memorizeTime = GetMemorizeTimeForCurrentRound();
+        float reconstructionTime = GetReconstructionTimeForCurrentRound();
+        int impostorsThisRound = GetImpostorsForCurrentRound();
+
+        Debug.Log(
+            "Round " + currentRound +
+            " | Objects: " + objectsThisRound +
+            " | Memorize: " + memorizeTime +
+            " | Reconstruction: " + reconstructionTime +
+            " | Impostors: " + impostorsThisRound
+        );
 
         SelectObjectsForRound(objectsThisRound);
         SpawnMemoryObjects();
@@ -83,6 +87,7 @@ public class GameManager : MonoBehaviour
 
         HideMemoryObjects();
         ActivateSelectedPickupObjects();
+        ActivateImpostorPickupObjects(impostorsThisRound);
 
         if (chest != null)
             chest.OpenChestInstant();
@@ -92,18 +97,34 @@ public class GameManager : MonoBehaviour
 
     int GetObjectsForCurrentRound()
     {
-        return Mathf.Min(
-            startingObjects + ((currentRound - 1) * objectsIncreasePerRound),
-            maxObjects
-        );
+        if (currentRound <= 5)
+            return Mathf.Min(2 + currentRound, maxObjects);
+
+        return Mathf.Min(7 + (currentRound - 5), maxObjects);
     }
 
     float GetMemorizeTimeForCurrentRound()
     {
-        return Mathf.Max(
-            startingMemorizeTime - ((currentRound - 1) * memorizeTimeDecreasePerRound),
-            minimumMemorizeTime
-        );
+        if (currentRound <= 5)
+            return 7f + currentRound;
+
+        return Mathf.Min(12f + (currentRound - 5), 15f);
+    }
+
+    float GetReconstructionTimeForCurrentRound()
+    {
+        if (currentRound <= 5)
+            return 20f + (currentRound * 5f);
+
+        return Mathf.Min(45f + ((currentRound - 5) * 5f), 60f);
+    }
+
+    int GetImpostorsForCurrentRound()
+    {
+        if (currentRound < 6)
+            return 0;
+
+        return Mathf.Min(currentRound - 5, maxImpostors);
     }
 
     void SelectObjectsForRound(int amount)
@@ -173,7 +194,6 @@ public class GameManager : MonoBehaviour
             }
 
             spawnedMemoryObjects.Add(obj);
-
             availableSpawns.RemoveAt(spawnIndex);
         }
     }
@@ -212,6 +232,31 @@ public class GameManager : MonoBehaviour
 
             if (id != null && selectedObjectIDs.Contains(id.objectID))
                 child.gameObject.SetActive(true);
+        }
+    }
+
+    void ActivateImpostorPickupObjects(int amount)
+    {
+        if (amount <= 0) return;
+
+        List<Transform> availableImpostors = new List<Transform>();
+
+        foreach (Transform child in pickupObjectsParent)
+        {
+            MemoryObjectID id = child.GetComponent<MemoryObjectID>();
+
+            if (id != null && !selectedObjectIDs.Contains(id.objectID))
+            {
+                availableImpostors.Add(child);
+            }
+        }
+
+        for (int i = 0; i < amount && availableImpostors.Count > 0; i++)
+        {
+            int randomIndex = Random.Range(0, availableImpostors.Count);
+
+            availableImpostors[randomIndex].gameObject.SetActive(true);
+            availableImpostors.RemoveAt(randomIndex);
         }
     }
 

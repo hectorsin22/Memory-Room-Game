@@ -21,6 +21,8 @@ public class PickableObject : MonoBehaviour
 
     public bool centerObjectOnPlayer = true;
 
+    public bool keepOriginalRotationWhenCarried = true;
+
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     private Transform originalParent;
@@ -37,7 +39,12 @@ public class PickableObject : MonoBehaviour
     {
         if (!isBeingCarried || carrier == null) return;
 
-        transform.localRotation = Quaternion.Euler(carryLocalRotation);
+        //transform.localRotation = Quaternion.Euler(carryLocalRotation);
+
+        if (!keepOriginalRotationWhenCarried)
+        {
+            transform.localRotation = Quaternion.Euler(carryLocalRotation);
+        }
 
         if (centerObjectOnPlayer)
         {
@@ -80,7 +87,12 @@ public class PickableObject : MonoBehaviour
         carrier = player;
 
         transform.SetParent(player, true);
-        transform.localRotation = Quaternion.Euler(carryLocalRotation);
+
+        if (!keepOriginalRotationWhenCarried)
+        {
+            transform.localRotation = Quaternion.Euler(carryLocalRotation);
+        }
+        //transform.localRotation = Quaternion.Euler(carryLocalRotation);
 
         if (centerObjectOnPlayer)
             CenterObjectOnCarrier();
