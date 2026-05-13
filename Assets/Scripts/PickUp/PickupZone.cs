@@ -3,7 +3,11 @@ using UnityEngine;
 public class PickupZone : MonoBehaviour
 {
     private PickableObject pickable;
+
     public float pickupRadius = 5f;
+
+    // Height under which the player is considered crouching
+    public float crouchHeight = 1.0f;
 
     void Awake()
     {
@@ -14,35 +18,27 @@ public class PickupZone : MonoBehaviour
     {
         if (pickable == null) return;
 
-        // Prevent picking multiple objects at the same time
         if (pickable.isBeingCarried) return;
         if (PickableObject.objectAlreadyCarried) return;
+        if (Time.time < PickableObject.globalPickupBlockedUntil) return;
 
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        float minDist = Mathf.Infinity;
-        Transform closest = null;
-
-        foreach (GameObject p in players)
+        foreach (GameObject player in players)
         {
-            Vector3 playerPos = p.transform.position;
-            Vector3 objectPos = transform.position;
+            Vector3 playerPos = player.transform.position;
+            Vector3 triggerPos = transform.position;
 
-            playerPos.y = 0;
-            objectPos.y = 0;
+            Vector3 playerXZ = new Vector3(playerPos.x, 0f, playerPos.z);
+            Vector3 triggerXZ = new Vector3(triggerPos.x, 0f, triggerPos.z);
 
-            float dist = Vector3.Distance(playerPos, objectPos);
+            float distance = Vector3.Distance(playerXZ, triggerXZ);
 
-            if (dist < minDist)
+            if (distance <= pickupRadius && player.transform.position.y < crouchHeight)
             {
-                minDist = dist;
-                closest = p.transform;
+                pickable.PickUp(player.transform);
+                return;
             }
-        }
-
-        if (closest != null && minDist < pickupRadius)
-        {
-            pickable.PickUp(closest);
         }
     }
 }

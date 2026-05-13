@@ -36,6 +36,9 @@ public class GameManager : MonoBehaviour
     private readonly List<GameObject> spawnedMemoryObjects = new List<GameObject>();
     private readonly List<string> selectedObjectIDs = new List<string>();
 
+    // Saves where each object appeared during the memorize phase
+    private readonly Dictionary<string, Transform> correctSpawnByObjectID = new Dictionary<string, Transform>();
+
     void Start()
     {
         StartCoroutine(RoundLoop());
@@ -185,6 +188,10 @@ public class GameManager : MonoBehaviour
 
             obj.name = prefab.name;
 
+            correctSpawnByObjectID[objectID] = spawn;
+
+            Debug.Log("Object " + objectID + " appeared at spawn " + spawn.name);
+
             Transform pickupReference = FindPickupObjectByID(objectID);
 
             if (pickupReference != null)
@@ -196,6 +203,19 @@ public class GameManager : MonoBehaviour
             spawnedMemoryObjects.Add(obj);
             availableSpawns.RemoveAt(spawnIndex);
         }
+    }
+
+    public Transform GetCorrectSpawnForObject(string objectID)
+    {
+        if (correctSpawnByObjectID.TryGetValue(objectID, out Transform spawn))
+            return spawn;
+
+        return null;
+    }
+
+    public bool WasObjectSelectedThisRound(string objectID)
+    {
+        return selectedObjectIDs.Contains(objectID);
     }
 
     GameObject FindMemoryPrefabByID(string objectID)
@@ -262,7 +282,9 @@ public class GameManager : MonoBehaviour
 
     void DisableAllPickupObjects()
     {
-        PickableObject[] allPickables = FindObjectsOfType<PickableObject>();
+        PickableObject[] allPickables = Object.FindObjectsByType<PickableObject>(
+            FindObjectsSortMode.None
+        );
 
         foreach (PickableObject pickable in allPickables)
         {
@@ -293,5 +315,6 @@ public class GameManager : MonoBehaviour
 
         spawnedMemoryObjects.Clear();
         selectedObjectIDs.Clear();
+        correctSpawnByObjectID.Clear();
     }
 }

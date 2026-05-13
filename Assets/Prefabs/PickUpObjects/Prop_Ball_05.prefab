@@ -67,6 +67,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pickupRadius: 5
+  crouchHeight: 1
 --- !u!1 &8826031244939101966
 GameObject:
   m_ObjectHideFlags: 0
@@ -97,7 +98,7 @@ Transform:
   m_GameObject: {fileID: 8826031244939101966}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -18, y: 0.76263994, z: 48.24}
+  m_LocalPosition: {x: -18, y: 0.76263994, z: 44.820004}
   m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -193,8 +194,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isBeingCarried: 0
-  dropHeight: 0.5
-  pickupCooldownAfterDrop: 1
+  crouchHeight: 1
+  standHeight: 1.3
+  pickupCooldownAfterDrop: 2
+  carriedObjectHeight: 0.2
+  carryOffsetXZ: {x: 0, y: 0}
 --- !u!114 &-3522599229469152268
 MonoBehaviour:
   m_ObjectHideFlags: 0

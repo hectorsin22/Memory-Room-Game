@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7122891286010668708
+--- !u!1 &4222438833284445113
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 411437549680621893}
-  - component: {fileID: 3292281270285683275}
-  - component: {fileID: 7517393568514788225}
-  - component: {fileID: -8974519711454134126}
+  - component: {fileID: 8801276786982726474}
+  - component: {fileID: 4285653535734348226}
+  - component: {fileID: 7673708878326644463}
+  - component: {fileID: 4314827343902938574}
   m_Layer: 0
   m_Name: Prop_HulaHoop_01
   m_TagString: Untagged
@@ -19,36 +19,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &411437549680621893
+--- !u!4 &8801276786982726474
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7122891286010668708}
+  m_GameObject: {fileID: 4222438833284445113}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8.381536, y: -0.06437063, z: -16.420408}
+  m_LocalPosition: {x: -31.48, y: -0.06437063, z: 40.12001}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &3292281270285683275
+--- !u!33 &4285653535734348226
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7122891286010668708}
+  m_GameObject: {fileID: 4222438833284445113}
   m_Mesh: {fileID: -6055266454826544533, guid: 0dee1077c5e190f42a9e3ceebf8023d4, type: 3}
---- !u!23 &7517393568514788225
+--- !u!23 &7673708878326644463
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7122891286010668708}
+  m_GameObject: {fileID: 4222438833284445113}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -87,16 +87,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-8974519711454134126
+--- !u!114 &4314827343902938574
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7122891286010668708}
+  m_GameObject: {fileID: 4222438833284445113}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7391df7f013a70449a02fab1dabb7bf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectID: 
+  objectID: Prop_HulaHoop_01

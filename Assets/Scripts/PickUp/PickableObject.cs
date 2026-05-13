@@ -11,53 +11,54 @@ public class PickableObject : MonoBehaviour
 
     public bool isBeingCarried = false;
 
-    public float dropHeight = 2f;
+    // Height under which the player is considered crouching
+    public float crouchHeight = 1.0f;
+
+    // Height over which the player is considered standing after picking up
+    public float standHeight = 1.3f;
 
     // Time in seconds during which pickup is disabled after dropping
-    public float pickupCooldownAfterDrop = 1f;
+    public float pickupCooldownAfterDrop = 1.5f;
 
-    public Vector3 carryLocalPosition = new Vector3(0f, 1.5f, 0f);
-    public Vector3 carryLocalRotation = Vector3.zero;
+    // Object follows the player in X/Z only, keeping this fixed height
+    public float carriedObjectHeight = 0.2f;
 
-    public bool centerObjectOnPlayer = true;
-
-    public bool keepOriginalRotationWhenCarried = true;
+    // Offset on the floor relative to the player
+    public Vector2 carryOffsetXZ = Vector2.zero;
 
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     private Transform originalParent;
     private Transform carrier;
 
+    private Quaternion carriedRotation;
+    private bool playerStoodUpAfterPickup = false;
+
     void Start()
     {
         originalPosition = transform.position;
         originalRotation = transform.rotation;
         originalParent = transform.parent;
+
+        carriedObjectHeight = transform.position.y;
     }
 
     void Update()
     {
         if (!isBeingCarried || carrier == null) return;
 
-        //transform.localRotation = Quaternion.Euler(carryLocalRotation);
+        Vector3 targetPosition = new Vector3(
+            carrier.position.x + carryOffsetXZ.x,
+            carriedObjectHeight,
+            carrier.position.z + carryOffsetXZ.y
+        );
 
-        if (!keepOriginalRotationWhenCarried)
-        {
-            transform.localRotation = Quaternion.Euler(carryLocalRotation);
-        }
-
-        if (centerObjectOnPlayer)
-        {
-            CenterObjectOnCarrier();
-        }
-        else
-        {
-            transform.localPosition = carryLocalPosition;
-        }
+        transform.position = targetPosition;
+        transform.rotation = carriedRotation;
 
         // TEMPORARY DEBUG CONTROL FOR EDITOR TESTING
         // This must be removed in the final VR version.
-        // Because final drop mechanic should be based on tracker height.
+        // Because final drop mechanic should be based on crouching.
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             Debug.Log("Soltando objeto con E");
@@ -65,10 +66,17 @@ public class PickableObject : MonoBehaviour
             return;
         }
 
-        // Final VR drop mechanic using tracker height
-        if (carrier.position.y > dropHeight)
+        if (!playerStoodUpAfterPickup && carrier.position.y > standHeight)
         {
-            Debug.Log("Mano levantada, soltando objeto!");
+            playerStoodUpAfterPickup = true;
+        }
+
+        // Final lab interaction:
+        // After picking up, the player must stand up first.
+        // Then crouching again drops the object.
+        if (playerStoodUpAfterPickup && carrier.position.y < crouchHeight)
+        {
+            Debug.Log("Jugador agachado por segunda vez, soltando objeto!");
             Drop();
         }
     }
@@ -86,43 +94,10 @@ public class PickableObject : MonoBehaviour
 
         carrier = player;
 
-        transform.SetParent(player, true);
+        carriedObjectHeight = transform.position.y;
+        carriedRotation = transform.rotation;
 
-        if (!keepOriginalRotationWhenCarried)
-        {
-            transform.localRotation = Quaternion.Euler(carryLocalRotation);
-        }
-        //transform.localRotation = Quaternion.Euler(carryLocalRotation);
-
-        if (centerObjectOnPlayer)
-            CenterObjectOnCarrier();
-        else
-            transform.localPosition = carryLocalPosition;
-    }
-
-    private void CenterObjectOnCarrier()
-    {
-        Vector3 targetWorldPosition = carrier.TransformPoint(carryLocalPosition);
-
-        Renderer[] renderers = GetComponentsInChildren<Renderer>();
-
-        if (renderers.Length == 0)
-        {
-            transform.localPosition = carryLocalPosition;
-            return;
-        }
-
-        Bounds bounds = renderers[0].bounds;
-
-        foreach (Renderer renderer in renderers)
-        {
-            bounds.Encapsulate(renderer.bounds);
-        }
-
-        Vector3 visualCenter = bounds.center;
-        Vector3 correction = targetWorldPosition - visualCenter;
-
-        transform.position += correction;
+        playerStoodUpAfterPickup = false;
     }
 
     public void Drop()
@@ -138,6 +113,7 @@ public class PickableObject : MonoBehaviour
         transform.SetParent(originalParent, true);
 
         carrier = null;
+        playerStoodUpAfterPickup = false;
     }
 
     public void ForceDisappear()
@@ -147,6 +123,7 @@ public class PickableObject : MonoBehaviour
             isBeingCarried = false;
             objectAlreadyCarried = false;
             carrier = null;
+            playerStoodUpAfterPickup = false;
         }
 
         transform.SetParent(originalParent, true);
