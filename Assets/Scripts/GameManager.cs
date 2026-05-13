@@ -181,16 +181,12 @@ public class GameManager : MonoBehaviour
 
             GameObject obj = Instantiate(
                 prefab,
-                spawn.position,
+                Vector3.zero,
                 spawn.rotation,
                 originalObjectsParent
             );
 
             obj.name = prefab.name;
-
-            correctSpawnByObjectID[objectID] = spawn;
-
-            Debug.Log("Object " + objectID + " appeared at spawn " + spawn.name);
 
             Transform pickupReference = FindPickupObjectByID(objectID);
 
@@ -199,6 +195,22 @@ public class GameManager : MonoBehaviour
                 obj.transform.rotation = pickupReference.rotation;
                 obj.transform.localScale = pickupReference.localScale;
             }
+
+            GroundPoint groundPoint = obj.GetComponentInChildren<GroundPoint>();
+
+            if (groundPoint != null)
+            {
+                Vector3 correction = spawn.position - groundPoint.transform.position;
+                obj.transform.position += correction;
+            }
+            else
+            {
+                obj.transform.position = spawn.position;
+            }
+
+            correctSpawnByObjectID[objectID] = spawn;
+
+            Debug.Log("Object " + objectID + " appeared at spawn " + spawn.name);
 
             spawnedMemoryObjects.Add(obj);
             availableSpawns.RemoveAt(spawnIndex);
