@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public enum GameState
     {
+        Menu,
         Memorize,
         Reconstruction,
         RoundFinished
@@ -14,6 +15,15 @@ public class GameManager : MonoBehaviour
     [Header("State")]
     public GameState currentState;
     public int currentRound = 1;
+
+    [Header("Menu")]
+    public GameObject menuRoot;
+    public GameObject environmentTitle;
+
+    [Header("Lighting")]
+    public Light mainLight;
+    public float menuLightIntensity = 0.15f;
+    public float gameplayLightIntensity = 1f;
 
     [Header("Memory Objects")]
     public GameObject[] memoryObjectPrefabs;
@@ -41,7 +51,53 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        ShowMenu();
+    }
+
+    void ShowMenu()
+    {
+        currentState = GameState.Menu;
+
+        if (menuRoot != null)
+            menuRoot.SetActive(true);
+
+        if (environmentTitle != null)
+            environmentTitle.SetActive(false);
+
+        if (mainLight != null)
+            mainLight.intensity = menuLightIntensity;
+
+        ClearRound();
+        ShowAllPickupObjects();
+
+        if (chest != null)
+            chest.CloseChest();
+    }
+
+    public void StartGameFromMenu()
+    {
+        if (currentState != GameState.Menu)
+            return;
+
+        if (menuRoot != null)
+            menuRoot.SetActive(false);
+
+        if (environmentTitle != null)
+            environmentTitle.SetActive(true);
+
+        if (mainLight != null)
+            mainLight.intensity = gameplayLightIntensity;
+
+        currentRound = 1;
+
+        DisableAllPickupObjects();
+
         StartCoroutine(RoundLoop());
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     IEnumerator RoundLoop()
@@ -289,6 +345,16 @@ public class GameManager : MonoBehaviour
 
             availableImpostors[randomIndex].gameObject.SetActive(true);
             availableImpostors.RemoveAt(randomIndex);
+        }
+    }
+
+    void ShowAllPickupObjects()
+    {
+        PickableObject.objectAlreadyCarried = false;
+
+        foreach (Transform child in pickupObjectsParent)
+        {
+            child.gameObject.SetActive(true);
         }
     }
 
