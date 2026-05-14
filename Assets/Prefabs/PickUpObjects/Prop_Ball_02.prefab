@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2511915101735838306
+--- !u!1 &6587806908945687799
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 9063358008153228067}
-  - component: {fileID: 8565766273045118913}
-  - component: {fileID: 8991150094117215423}
+  - component: {fileID: 5693228506165421435}
+  - component: {fileID: 3492159590784617344}
+  - component: {fileID: 2280978646316114572}
   m_Layer: 0
   m_Name: PickupTrigger
   m_TagString: Untagged
@@ -18,28 +18,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &9063358008153228067
+--- !u!4 &5693228506165421435
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2511915101735838306}
+  m_GameObject: {fileID: 6587806908945687799}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 32.142857, y: 32.142857, z: 32.142857}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6931932780150763879}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &8565766273045118913
+--- !u!135 &3492159590784617344
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2511915101735838306}
+  m_GameObject: {fileID: 6587806908945687799}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -52,22 +52,21 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.35
+  m_Radius: 0.3
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8991150094117215423
+--- !u!114 &2280978646316114572
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2511915101735838306}
+  m_GameObject: {fileID: 6587806908945687799}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e65ce8782d404435a25c5a27967944f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupRadius: 5
-  crouchHeight: 1
+  pickupRadius: 1.5
 --- !u!1 &8254271966659966732
 GameObject:
   m_ObjectHideFlags: 0
@@ -97,12 +96,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8254271966659966732}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -18.179996, y: 1.42264, z: 39.960003}
   m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 9063358008153228067}
+  - {fileID: 5693228506165421435}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7878562531703971664

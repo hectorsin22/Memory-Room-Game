@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &572549494064274920
+--- !u!1 &4079590198732733263
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6782192206374660608}
-  - component: {fileID: 6652544620154517738}
-  - component: {fileID: 9185562248558672823}
+  - component: {fileID: 457402655091513662}
+  - component: {fileID: 5487776132181417688}
+  - component: {fileID: 6572856829016837383}
   m_Layer: 0
   m_Name: PickupTrigger
   m_TagString: Untagged
@@ -18,28 +18,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6782192206374660608
+--- !u!4 &457402655091513662
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 572549494064274920}
+  m_GameObject: {fileID: 4079590198732733263}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 32.142857, y: 32.142857, z: 32.142857}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 690375329384702643}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &6652544620154517738
+--- !u!135 &5487776132181417688
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 572549494064274920}
+  m_GameObject: {fileID: 4079590198732733263}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -52,22 +52,21 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.35
+  m_Radius: 0.3
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &9185562248558672823
+--- !u!114 &6572856829016837383
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 572549494064274920}
+  m_GameObject: {fileID: 4079590198732733263}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e65ce8782d404435a25c5a27967944f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupRadius: 5
-  crouchHeight: 1
+  pickupRadius: 1.5
 --- !u!1 &7352740120513650740
 GameObject:
   m_ObjectHideFlags: 0
@@ -97,12 +96,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7352740120513650740}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -23.07, y: 1.16264, z: 35.18}
   m_LocalScale: {x: 7, y: 7, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6782192206374660608}
+  - {fileID: 457402655091513662}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8820034298681354766

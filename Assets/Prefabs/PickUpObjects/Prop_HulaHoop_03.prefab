@@ -28,12 +28,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438512100153664743}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -31.39, y: -0.064368725, z: 40.070004}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1840702752475315841}
+  - {fileID: 8455097950677166184}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8581597438996480766
@@ -120,7 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: Prop_HulaHoop_03
---- !u!1 &8249231115806222027
+--- !u!1 &2315391677787534599
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,9 +128,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1840702752475315841}
-  - component: {fileID: 662163161276619504}
-  - component: {fileID: 5304174644707357432}
+  - component: {fileID: 8455097950677166184}
+  - component: {fileID: 3230195997970394485}
+  - component: {fileID: 1452478879370443421}
   m_Layer: 0
   m_Name: PickupTrigger
   m_TagString: Untagged
@@ -138,28 +138,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1840702752475315841
+--- !u!4 &8455097950677166184
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8249231115806222027}
+  m_GameObject: {fileID: 2315391677787534599}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 22.5, y: 22.5, z: 22.5}
+  m_LocalPosition: {x: -0.009000015, y: 0, z: 0.0050006867}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3410721796972838861}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &662163161276619504
+--- !u!135 &3230195997970394485
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8249231115806222027}
+  m_GameObject: {fileID: 2315391677787534599}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -172,19 +172,18 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1.5
+  m_Radius: 0.55
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5304174644707357432
+--- !u!114 &1452478879370443421
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8249231115806222027}
+  m_GameObject: {fileID: 2315391677787534599}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e65ce8782d404435a25c5a27967944f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pickupRadius: 5
-  crouchHeight: 1

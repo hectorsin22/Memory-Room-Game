@@ -12,13 +12,13 @@ public class PickableObject : MonoBehaviour
     public bool isBeingCarried = false;
 
     // Height under which the player is considered crouching
-    public float crouchHeight = 1.0f;
+    public float crouchHeight = 0.3f;
 
     // Height over which the player is considered standing after picking up
-    public float standHeight = 1.3f;
+    public float standHeight = 0.8f;
 
     // Time in seconds during which pickup is disabled after dropping
-    public float pickupCooldownAfterDrop = 1.5f;
+    public float pickupCooldownAfterDrop = 2f;
 
     // Object follows the player in X/Z only, keeping this fixed height
     public float carriedObjectHeight = 0.2f;
@@ -66,14 +66,13 @@ public class PickableObject : MonoBehaviour
             return;
         }
 
+        // Player has stood up after picking up the object
         if (!playerStoodUpAfterPickup && carrier.position.y > standHeight)
         {
             playerStoodUpAfterPickup = true;
         }
 
-        // Final lab interaction:
-        // After picking up, the player must stand up first.
-        // Then crouching again drops the object.
+        // Player crouches again to drop the object
         if (playerStoodUpAfterPickup && carrier.position.y < crouchHeight)
         {
             Debug.Log("Jugador agachado por segunda vez, soltando objeto!");
@@ -83,11 +82,19 @@ public class PickableObject : MonoBehaviour
 
     public void PickUp(Transform player)
     {
-        // Prevent pickup during cooldown
-        if (Time.time < globalPickupBlockedUntil) return;
+        // Player must be crouching to pick up the object
+        if (player.position.y > crouchHeight)
+            return;
 
-        if (isBeingCarried) return;
-        if (objectAlreadyCarried) return;
+        // Prevent pickup during cooldown
+        if (Time.time < globalPickupBlockedUntil)
+            return;
+
+        if (isBeingCarried)
+            return;
+
+        if (objectAlreadyCarried)
+            return;
 
         isBeingCarried = true;
         objectAlreadyCarried = true;
@@ -102,7 +109,8 @@ public class PickableObject : MonoBehaviour
 
     public void Drop()
     {
-        if (!isBeingCarried) return;
+        if (!isBeingCarried)
+            return;
 
         isBeingCarried = false;
         objectAlreadyCarried = false;
@@ -127,8 +135,10 @@ public class PickableObject : MonoBehaviour
         }
 
         transform.SetParent(originalParent, true);
+
         transform.position = originalPosition;
         transform.rotation = originalRotation;
+
         gameObject.SetActive(false);
     }
 

@@ -3,20 +3,18 @@ using UnityEngine;
 public class PickupZone : MonoBehaviour
 {
     private PickableObject pickable;
-
-    public float pickupRadius = 5f;
-
-    // Height under which the player is considered crouching
-    public float crouchHeight = 1.0f;
+    private Collider triggerCollider;
 
     void Awake()
     {
         pickable = GetComponentInParent<PickableObject>();
+        triggerCollider = GetComponent<Collider>();
     }
 
     void Update()
     {
         if (pickable == null) return;
+        if (triggerCollider == null) return;
 
         if (pickable.isBeingCarried) return;
         if (PickableObject.objectAlreadyCarried) return;
@@ -26,19 +24,22 @@ public class PickupZone : MonoBehaviour
 
         foreach (GameObject player in players)
         {
-            Vector3 playerPos = player.transform.position;
-            Vector3 triggerPos = transform.position;
-
-            Vector3 playerXZ = new Vector3(playerPos.x, 0f, playerPos.z);
-            Vector3 triggerXZ = new Vector3(triggerPos.x, 0f, triggerPos.z);
-
-            float distance = Vector3.Distance(playerXZ, triggerXZ);
-
-            if (distance <= pickupRadius && player.transform.position.y < crouchHeight)
+            if (IsPlayerInsideTriggerXZ(player.transform))
             {
                 pickable.PickUp(player.transform);
                 return;
             }
         }
+    }
+
+    private bool IsPlayerInsideTriggerXZ(Transform player)
+    {
+        Bounds bounds = triggerCollider.bounds;
+        Vector3 playerPos = player.position;
+
+        bool insideX = playerPos.x >= bounds.min.x && playerPos.x <= bounds.max.x;
+        bool insideZ = playerPos.z >= bounds.min.z && playerPos.z <= bounds.max.z;
+
+        return insideX && insideZ;
     }
 }

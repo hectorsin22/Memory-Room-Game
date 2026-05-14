@@ -29,12 +29,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 660403903246233434}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -18.06, y: -0.07735813, z: 35.45}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6912220951014270608}
+  - {fileID: 4092656141315943272}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6340176383052992078
@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectID: Prop_EarthMapBall
---- !u!1 &2339454076400214670
+--- !u!1 &8576230429211799712
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -151,9 +151,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6912220951014270608}
-  - component: {fileID: 113437823883213175}
-  - component: {fileID: 4242297642278308247}
+  - component: {fileID: 4092656141315943272}
+  - component: {fileID: 8250857165370545568}
+  - component: {fileID: 6537485508478242362}
   m_Layer: 0
   m_Name: PickupTrigger
   m_TagString: Untagged
@@ -161,28 +161,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6912220951014270608
+--- !u!4 &4092656141315943272
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2339454076400214670}
+  m_GameObject: {fileID: 8576230429211799712}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 22.5, y: 22.5, z: 22.5}
+  m_LocalPosition: {x: 0.021, y: 0.285, z: -0.005}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8300179318038904836}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &113437823883213175
+--- !u!135 &8250857165370545568
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2339454076400214670}
+  m_GameObject: {fileID: 8576230429211799712}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -195,19 +195,18 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.35
+  m_Radius: 0.3
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4242297642278308247
+--- !u!114 &6537485508478242362
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2339454076400214670}
+  m_GameObject: {fileID: 8576230429211799712}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e65ce8782d404435a25c5a27967944f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupRadius: 5
-  crouchHeight: 1
+  pickupRadius: 1.5
