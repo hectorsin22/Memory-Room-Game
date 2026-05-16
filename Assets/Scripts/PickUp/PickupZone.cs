@@ -3,46 +3,43 @@ using UnityEngine;
 public class PickupZone : MonoBehaviour
 {
     private PickableObject pickable;
-    public float pickupRadius = 5f;
+    private Collider triggerCollider;
 
     void Awake()
     {
         pickable = GetComponentInParent<PickableObject>();
+        triggerCollider = GetComponent<Collider>();
     }
 
     void Update()
     {
         if (pickable == null) return;
+        if (triggerCollider == null) return;
 
-        // Prevent picking multiple objects at the same time
         if (pickable.isBeingCarried) return;
         if (PickableObject.objectAlreadyCarried) return;
+        if (Time.time < PickableObject.globalPickupBlockedUntil) return;
 
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        float minDist = Mathf.Infinity;
-        Transform closest = null;
-
-        foreach (GameObject p in players)
+        foreach (GameObject player in players)
         {
-            Vector3 playerPos = p.transform.position;
-            Vector3 objectPos = transform.position;
-
-            playerPos.y = 0;
-            objectPos.y = 0;
-
-            float dist = Vector3.Distance(playerPos, objectPos);
-
-            if (dist < minDist)
+            if (IsPlayerInsideTriggerXZ(player.transform))
             {
-                minDist = dist;
-                closest = p.transform;
+                pickable.PickUp(player.transform);
+                return;
             }
         }
+    }
 
-        if (closest != null && minDist < pickupRadius)
-        {
-            pickable.PickUp(closest);
-        }
+    private bool IsPlayerInsideTriggerXZ(Transform player)
+    {
+        Bounds bounds = triggerCollider.bounds;
+        Vector3 playerPos = player.position;
+
+        bool insideX = playerPos.x >= bounds.min.x && playerPos.x <= bounds.max.x;
+        bool insideZ = playerPos.z >= bounds.min.z && playerPos.z <= bounds.max.z;
+
+        return insideX && insideZ;
     }
 }

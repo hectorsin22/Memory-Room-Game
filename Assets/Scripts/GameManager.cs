@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public enum GameState
     {
+        Menu,
         Memorize,
         Reconstruction,
         RoundFinished
@@ -14,6 +15,15 @@ public class GameManager : MonoBehaviour
     [Header("State")]
     public GameState currentState;
     public int currentRound = 1;
+
+    [Header("Menu")]
+    public GameObject menuRoot;
+    public GameObject environmentTitle;
+
+    [Header("Lighting")]
+    public Light mainLight;
+    public float menuLightIntensity = 0.15f;
+    public float gameplayLightIntensity = 1f;
 
     [Header("Memory Objects")]
     public GameObject[] memoryObjectPrefabs;
@@ -36,9 +46,58 @@ public class GameManager : MonoBehaviour
     private readonly List<GameObject> spawnedMemoryObjects = new List<GameObject>();
     private readonly List<string> selectedObjectIDs = new List<string>();
 
+    // Saves where each object appeared during the memorize phase
+    private readonly Dictionary<string, Transform> correctSpawnByObjectID = new Dictionary<string, Transform>();
+
     void Start()
     {
+        ShowMenu();
+    }
+
+    void ShowMenu()
+    {
+        currentState = GameState.Menu;
+
+        if (menuRoot != null)
+            menuRoot.SetActive(true);
+
+        if (environmentTitle != null)
+            environmentTitle.SetActive(false);
+
+        if (mainLight != null)
+            mainLight.intensity = menuLightIntensity;
+
+        ClearRound();
+        ShowAllPickupObjects();
+
+        if (chest != null)
+            chest.CloseChest();
+    }
+
+    public void StartGameFromMenu()
+    {
+        if (currentState != GameState.Menu)
+            return;
+
+        if (menuRoot != null)
+            menuRoot.SetActive(false);
+
+        if (environmentTitle != null)
+            environmentTitle.SetActive(true);
+
+        if (mainLight != null)
+            mainLight.intensity = gameplayLightIntensity;
+
+        currentRound = 1;
+
+        DisableAllPickupObjects();
+
         StartCoroutine(RoundLoop());
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     IEnumerator RoundLoop()
@@ -178,7 +237,7 @@ public class GameManager : MonoBehaviour
 
             GameObject obj = Instantiate(
                 prefab,
-                spawn.position,
+                Vector3.zero,
                 spawn.rotation,
                 originalObjectsParent
             );
@@ -193,9 +252,38 @@ public class GameManager : MonoBehaviour
                 obj.transform.localScale = pickupReference.localScale;
             }
 
+            GroundPoint groundPoint = obj.GetComponentInChildren<GroundPoint>();
+
+            if (groundPoint != null)
+            {
+                Vector3 correction = spawn.position - groundPoint.transform.position;
+                obj.transform.position += correction;
+            }
+            else
+            {
+                obj.transform.position = spawn.position;
+            }
+
+            correctSpawnByObjectID[objectID] = spawn;
+
+            Debug.Log("Object " + objectID + " appeared at spawn " + spawn.name);
+
             spawnedMemoryObjects.Add(obj);
             availableSpawns.RemoveAt(spawnIndex);
         }
+    }
+
+    public Transform GetCorrectSpawnForObject(string objectID)
+    {
+        if (correctSpawnByObjectID.TryGetValue(objectID, out Transform spawn))
+            return spawn;
+
+        return null;
+    }
+
+    public bool WasObjectSelectedThisRound(string objectID)
+    {
+        return selectedObjectIDs.Contains(objectID);
     }
 
     GameObject FindMemoryPrefabByID(string objectID)
@@ -260,9 +348,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void ShowAllPickupObjects()
+    {
+        PickableObject.objectAlreadyCarried = false;
+
+        foreach (Transform child in pickupObjectsParent)
+        {
+            child.gameObject.SetActive(true);
+        }
+    }
+
     void DisableAllPickupObjects()
     {
-        PickableObject[] allPickables = FindObjectsOfType<PickableObject>();
+        PickableObject[] allPickables = Object.FindObjectsByType<PickableObject>(
+            FindObjectsSortMode.None
+        );
 
         foreach (PickableObject pickable in allPickables)
         {
@@ -293,5 +393,6 @@ public class GameManager : MonoBehaviour
 
         spawnedMemoryObjects.Clear();
         selectedObjectIDs.Clear();
+        correctSpawnByObjectID.Clear();
     }
 }
