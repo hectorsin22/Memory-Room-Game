@@ -131,6 +131,13 @@ public class TrackingManager : MonoBehaviour
             }
         }
 
+        // Assign player index so pickup/score systems can identify each player
+        for (int i = 0; i < players.Count; i++)
+        {
+            PlayerMovement pm = players[i].GetComponent<PlayerMovement>();
+            if (pm != null) pm.playerIndex = i;
+        }
+
         //start getNewPositions loop when tracking enabled
         if (enableTracking)
         {
@@ -277,21 +284,31 @@ public class TrackingManager : MonoBehaviour
     private void DisabledTrackingPlayerMovement()
     {
         if (players == null || players.Count == 0) return;
-        if (playerSelected < 1 || playerSelected > players.Count) return;
 
-        GameObject player = players[playerSelected - 1];
-        if (player == null || !player.activeSelf) return;
-
-        Vector3 move = Vector3.zero;
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
 
-        if (kb.wKey.isPressed) move += Vector3.forward;
-        if (kb.sKey.isPressed) move += Vector3.back;
-        if (kb.aKey.isPressed) move += Vector3.left;
-        if (kb.dKey.isPressed) move += Vector3.right;
+        // WASD → Player 1
+        if (players.Count >= 1 && players[0] != null && players[0].activeSelf)
+        {
+            Vector3 move = Vector3.zero;
+            if (kb.wKey.isPressed) move += Vector3.forward;
+            if (kb.sKey.isPressed) move += Vector3.back;
+            if (kb.aKey.isPressed) move += Vector3.left;
+            if (kb.dKey.isPressed) move += Vector3.right;
+            players[0].transform.Translate(move * Time.deltaTime * trackingDisabledPlayerSpeed);
+        }
 
-        player.transform.Translate(move * Time.deltaTime * trackingDisabledPlayerSpeed);
+        // Arrow keys → Player 2
+        if (players.Count >= 2 && players[1] != null && players[1].activeSelf)
+        {
+            Vector3 move = Vector3.zero;
+            if (kb.upArrowKey.isPressed) move += Vector3.forward;
+            if (kb.downArrowKey.isPressed) move += Vector3.back;
+            if (kb.leftArrowKey.isPressed) move += Vector3.left;
+            if (kb.rightArrowKey.isPressed) move += Vector3.right;
+            players[1].transform.Translate(move * Time.deltaTime * trackingDisabledPlayerSpeed);
+        }
     }
 
 /// <summary>

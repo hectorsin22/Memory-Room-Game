@@ -4,6 +4,7 @@ public class PickupZone : MonoBehaviour
 {
     private PickableObject pickable;
     private Collider triggerCollider;
+    private PlayerMovement[] players;
 
     void Awake()
     {
@@ -11,22 +12,35 @@ public class PickupZone : MonoBehaviour
         triggerCollider = GetComponent<Collider>();
     }
 
+    void Start()
+    {
+        // Cache once — avoids FindGameObjectsWithTag every frame
+        players = Object.FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None);
+    }
+
     void Update()
     {
         if (pickable == null) return;
         if (triggerCollider == null) return;
-
         if (pickable.isBeingCarried) return;
-        if (PickableObject.objectAlreadyCarried) return;
-        if (Time.time < PickableObject.globalPickupBlockedUntil) return;
 
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
-        foreach (GameObject player in players)
+        foreach (PlayerMovement pm in players)
         {
-            if (IsPlayerInsideTriggerXZ(player.transform))
+            if (pm == null || !pm.gameObject.activeSelf) continue;
+
+            int playerIndex = pm.playerIndex;
+            if (playerIndex < 0 || playerIndex >= PickableObject.MaxPlayers) continue;
+
+            // Per-player gates
+            if (PickableObject.playerCarrying[playerIndex]) continue;
+            if (Time.time < PickableObject.playerPickupBlockedUntil[playerIndex]) continue;
+
+            // Ownership gate: unclaimed or already owned by this player
+            if (pickable.owningPlayerIndex != -1 && pickable.owningPlayerIndex != playerIndex) continue;
+
+            if (IsPlayerInsideTriggerXZ(pm.transform))
             {
-                pickable.PickUp(player.transform);
+                pickable.PickUp(pm.transform);
                 return;
             }
         }

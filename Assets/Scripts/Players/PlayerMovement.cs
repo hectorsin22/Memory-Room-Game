@@ -5,9 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
-    // Start is called before the first frame update
     public Quaternion q;
     public bool manual;
+    public int playerIndex = 0;
     void Start()
     {
 

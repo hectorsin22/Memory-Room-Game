@@ -3,28 +3,29 @@ using UnityEngine.InputSystem;
 
 public class PickableObject : MonoBehaviour
 {
-    public static bool objectAlreadyCarried = false;
+    public const int MaxPlayers = 2;
 
-    // Small cooldown so the object is not instantly picked up again
-    // after dropping it while still inside the pickup radius
-    public static float globalPickupBlockedUntil = 0f;
+    // Per-player carrying state (replaces the old single global flag)
+    public static bool[] playerCarrying = new bool[MaxPlayers];
+    public static float[] playerPickupBlockedUntil = new float[MaxPlayers];
 
     public bool isBeingCarried = false;
 
-    // Height under which the player is considered crouching
     public float crouchHeight = 0.3f;
-
-    // Height over which the player is considered standing after picking up
     public float standHeight = 0.8f;
-
-    // Time in seconds during which pickup is disabled after dropping
     public float pickupCooldownAfterDrop = 2f;
-
-    // Object follows the player in X/Z only, keeping this fixed height
     public float carriedObjectHeight = 0.2f;
-
-    // Offset on the floor relative to the player
     public Vector2 carryOffsetXZ = Vector2.zero;
+
+    // -1 = unclaimed. Set permanently on first pickup for this round.
+    public int owningPlayerIndex = -1;
+
+    public bool scoredThisRound = false;
+    public bool wasDropped = false;
+    public Vector3 droppedPosition;
+
+    // Which DropZone currently holds this object (null if not placed)
+    public DropZone currentDropZone = null;
 
     private Vector3 originalPosition;
     private Quaternion originalRotation;
@@ -39,7 +40,6 @@ public class PickableObject : MonoBehaviour
         originalPosition = transform.position;
         originalRotation = transform.rotation;
         originalParent = transform.parent;
-
         carriedObjectHeight = transform.position.y;
     }
 
@@ -56,9 +56,7 @@ public class PickableObject : MonoBehaviour
         transform.position = targetPosition;
         transform.rotation = carriedRotation;
 
-        // TEMPORARY DEBUG CONTROL FOR EDITOR TESTING
-        // This must be removed in the final VR version.
-        // Because final drop mechanic should be based on crouching.
+        // TEMPORARY DEBUG CONTROL — remove before final VR build
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             Debug.Log("Soltando objeto con E");
@@ -66,13 +64,9 @@ public class PickableObject : MonoBehaviour
             return;
         }
 
-        // Player has stood up after picking up the object
         if (!playerStoodUpAfterPickup && carrier.position.y > standHeight)
-        {
             playerStoodUpAfterPickup = true;
-        }
 
-        // Player crouches again to drop the object
         if (playerStoodUpAfterPickup && carrier.position.y < crouchHeight)
         {
             Debug.Log("Jugador agachado por segunda vez, soltando objeto!");
@@ -82,70 +76,101 @@ public class PickableObject : MonoBehaviour
 
     public void PickUp(Transform player)
     {
-        // Player must be crouching to pick up the object
-        if (player.position.y > crouchHeight)
-            return;
+        // Only allow pickup during reconstruction phase
+        if (GameManager.Instance == null) return;
+        if (GameManager.Instance.currentState != GameManager.GameState.Reconstruction) return;
 
-        // Prevent pickup during cooldown
-        if (Time.time < globalPickupBlockedUntil)
-            return;
+        PlayerMovement pm = player.GetComponent<PlayerMovement>();
+        if (pm == null) return;
 
-        if (isBeingCarried)
-            return;
+        int playerIndex = pm.playerIndex;
+        if (playerIndex < 0 || playerIndex >= MaxPlayers) return;
 
-        if (objectAlreadyCarried)
-            return;
+        // Player must be crouching
+        if (player.position.y > crouchHeight) return;
+
+        // Per-player cooldown
+        if (Time.time < playerPickupBlockedUntil[playerIndex]) return;
+
+        if (isBeingCarried) return;
+
+        // Per-player carry limit (one object per player at a time)
+        if (playerCarrying[playerIndex]) return;
+
+        // Ownership check: unclaimed or already owned by this player
+        if (owningPlayerIndex != -1 && owningPlayerIndex != playerIndex) return;
+
+        // Claim ownership permanently for this round
+        if (owningPlayerIndex == -1)
+            owningPlayerIndex = playerIndex;
+
+        // If object was sitting in a drop zone, clear it so the zone is free
+        if (currentDropZone != null)
+        {
+            currentDropZone.ClearZone();
+            currentDropZone = null;
+        }
 
         isBeingCarried = true;
-        objectAlreadyCarried = true;
+        playerCarrying[playerIndex] = true;
 
         carrier = player;
-
         carriedObjectHeight = transform.position.y;
         carriedRotation = transform.rotation;
-
         playerStoodUpAfterPickup = false;
     }
 
     public void Drop()
     {
-        if (!isBeingCarried)
-            return;
+        if (!isBeingCarried) return;
 
         isBeingCarried = false;
-        objectAlreadyCarried = false;
 
-        // Start cooldown after dropping the object
-        globalPickupBlockedUntil = Time.time + pickupCooldownAfterDrop;
+        if (owningPlayerIndex >= 0 && owningPlayerIndex < MaxPlayers)
+        {
+            playerCarrying[owningPlayerIndex] = false;
+            playerPickupBlockedUntil[owningPlayerIndex] = Time.time + pickupCooldownAfterDrop;
+            // Record where this object landed for scoring at round end
+            droppedPosition = transform.position;
+            wasDropped = true;
+        }
 
         transform.SetParent(originalParent, true);
-
         carrier = null;
         playerStoodUpAfterPickup = false;
+    }
+
+    // Called by GameManager at the start of each round to reset all per-round state
+    public void ResetRoundState()
+    {
+        owningPlayerIndex = -1;
+        scoredThisRound = false;
+        wasDropped = false;
+        droppedPosition = Vector3.zero;
+        currentDropZone = null;
     }
 
     public void ForceDisappear()
     {
         if (isBeingCarried)
         {
+            if (owningPlayerIndex >= 0 && owningPlayerIndex < MaxPlayers)
+                playerCarrying[owningPlayerIndex] = false;
+
             isBeingCarried = false;
-            objectAlreadyCarried = false;
             carrier = null;
             playerStoodUpAfterPickup = false;
         }
 
         transform.SetParent(originalParent, true);
-
         transform.position = originalPosition;
         transform.rotation = originalRotation;
-
         gameObject.SetActive(false);
     }
 
     public void ReturnToOriginalPosition()
     {
         Drop();
-
         transform.position = originalPosition;
         transform.rotation = originalRotation;
     }

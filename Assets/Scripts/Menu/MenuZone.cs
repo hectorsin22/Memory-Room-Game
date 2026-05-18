@@ -9,6 +9,7 @@ public class MenuZone : MonoBehaviour
     }
 
     public MenuAction action;
+    public GameManager.GameMode gameMode = GameManager.GameMode.QuickMatch;
     public GameManager gameManager;
 
     public Vector2 zoneSize = new Vector2(4f, 2f);
@@ -34,7 +35,7 @@ public class MenuZone : MonoBehaviour
                 alreadyActivated = true;
 
                 if (action == MenuAction.StartGame)
-                    gameManager.StartGameFromMenu();
+                    gameManager.StartGameFromMenu(gameMode);
 
                 if (action == MenuAction.QuitGame)
                     gameManager.QuitGame();
@@ -44,9 +45,14 @@ public class MenuZone : MonoBehaviour
         }
     }
 
+    public void ResetZone()
+    {
+        alreadyActivated = false;
+    }
+
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = action == MenuAction.StartGame ? Color.green : Color.red;
 
         Vector3 center = transform.position;
         Vector3 right = transform.right * zoneSize.x / 2f;
@@ -61,5 +67,10 @@ public class MenuZone : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
+
+        // Label the mode in the editor
+#if UNITY_EDITOR
+        UnityEditor.Handles.Label(center, action == MenuAction.StartGame ? gameMode.ToString() : "Quit");
+#endif
     }
 }
