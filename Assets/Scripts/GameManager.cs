@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     public enum GameState
     {
         Menu,
@@ -12,8 +14,15 @@ public class GameManager : MonoBehaviour
         RoundFinished
     }
 
+    public enum GameMode
+    {
+        QuickMatch,
+        NormalMatch
+    }
+
     [Header("State")]
     public GameState currentState;
+    public GameMode currentMode;
     public int currentRound = 1;
 
     [Header("Menu")]
@@ -43,11 +52,29 @@ public class GameManager : MonoBehaviour
     [Header("Round Flow")]
     public float timeBetweenRounds = 3f;
 
+    [Header("Drop Zones")]
+    public DropZone[] allDropZones;
+
+    [Header("UI")]
+    public HUDController hud;
+    public WinnerScreenController winnerScreen;
+
+    [Header("Menu Zones (for reset on restart)")]
+    public MenuZone[] menuZones;
+
     private readonly List<GameObject> spawnedMemoryObjects = new List<GameObject>();
     private readonly List<string> selectedObjectIDs = new List<string>();
-
-    // Saves where each object appeared during the memorize phase
     private readonly Dictionary<string, Transform> correctSpawnByObjectID = new Dictionary<string, Transform>();
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
 
     void Start()
     {
@@ -58,41 +85,53 @@ public class GameManager : MonoBehaviour
     {
         currentState = GameState.Menu;
 
-        if (menuRoot != null)
-            menuRoot.SetActive(true);
-
-        if (environmentTitle != null)
-            environmentTitle.SetActive(false);
-
-        if (mainLight != null)
-            mainLight.intensity = menuLightIntensity;
+        if (menuRoot != null) menuRoot.SetActive(true);
+        if (environmentTitle != null) environmentTitle.SetActive(false);
+        if (mainLight != null) mainLight.intensity = menuLightIntensity;
 
         ClearRound();
         ShowAllPickupObjects();
 
-        if (chest != null)
-            chest.CloseChest();
+        if (chest != null) chest.CloseChest();
+
+        if (hud != null)
+        {
+            hud.UpdatePhase("");
+            hud.UpdateTimer(0);
+            hud.UpdateScore(0, 0);
+            hud.UpdateScore(1, 0);
+        }
     }
 
-    public void StartGameFromMenu()
+    public void StartGameFromMenu(GameMode mode)
     {
-        if (currentState != GameState.Menu)
-            return;
+        if (currentState != GameState.Menu) return;
 
-        if (menuRoot != null)
-            menuRoot.SetActive(false);
+        currentMode = mode;
 
-        if (environmentTitle != null)
-            environmentTitle.SetActive(true);
-
-        if (mainLight != null)
-            mainLight.intensity = gameplayLightIntensity;
+        if (menuRoot != null) menuRoot.SetActive(false);
+        if (environmentTitle != null) environmentTitle.SetActive(true);
+        if (mainLight != null) mainLight.intensity = gameplayLightIntensity;
 
         currentRound = 1;
 
-        DisableAllPickupObjects();
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.ResetScores();
 
+        if (hud != null)
+        {
+            hud.UpdateScore(0, 0);
+            hud.UpdateScore(1, 0);
+        }
+
+        DisableAllPickupObjects();
         StartCoroutine(RoundLoop());
+    }
+
+    // Legacy overload so existing MenuZone (action = StartGame) stays compatible
+    public void StartGameFromMenu()
+    {
+        StartGameFromMenu(GameMode.QuickMatch);
     }
 
     public void QuitGame()
@@ -100,29 +139,48 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
+    public void RestartMatch()
+    {
+        Time.timeScale = 1f;
+        StopAllCoroutines();
+        currentRound = 1;
+
+        foreach (MenuZone zone in menuZones)
+            if (zone != null) zone.ResetZone();
+
+        ShowMenu();
+    }
+
     IEnumerator RoundLoop()
     {
-        while (true)
+        while (currentRound <= GetMaxRounds())
         {
             yield return StartCoroutine(StartRound());
 
             currentState = GameState.RoundFinished;
+            if (hud != null) hud.UpdatePhase("Round finished!");
 
             yield return new WaitForSeconds(timeBetweenRounds);
 
             currentRound++;
         }
+
+        EndMatch();
     }
 
     IEnumerator StartRound()
     {
+        // Per-round cleanup
+        ClearAllDropZones();
+        ResetAllPickableObjectStates();
+
         currentState = GameState.Memorize;
+        if (hud != null) hud.UpdatePhase("Memorize the objects!");
 
         ClearRound();
         DisableAllPickupObjects();
 
-        if (chest != null)
-            chest.CloseChest();
+        if (chest != null) chest.CloseChest();
 
         int objectsThisRound = GetObjectsForCurrentRound();
         float memorizeTime = GetMemorizeTimeForCurrentRound();
@@ -140,25 +198,116 @@ public class GameManager : MonoBehaviour
         SelectObjectsForRound(objectsThisRound);
         SpawnMemoryObjects();
 
-        yield return new WaitForSeconds(memorizeTime);
+        // Memorize countdown
+        float timeLeft = memorizeTime;
+        while (timeLeft > 0f)
+        {
+            if (hud != null) hud.UpdateTimer(timeLeft);
+            timeLeft -= Time.deltaTime;
+            yield return null;
+        }
 
         currentState = GameState.Reconstruction;
+        if (hud != null) hud.UpdatePhase("Place them back!");
 
         HideMemoryObjects();
         ActivateSelectedPickupObjects();
         ActivateImpostorPickupObjects(impostorsThisRound);
 
-        if (chest != null)
-            chest.OpenChestInstant();
+        if (chest != null) chest.OpenChestInstant();
 
-        yield return new WaitForSeconds(reconstructionTime);
+        // Reconstruction countdown
+        timeLeft = reconstructionTime;
+        while (timeLeft > 0f)
+        {
+            if (hud != null) hud.UpdateTimer(timeLeft);
+            timeLeft -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (hud != null) hud.UpdateTimer(0);
+
+        ValidateRoundResults();
     }
+
+    void ValidateRoundResults()
+    {
+        PickableObject[] all = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
+        Debug.Log($"[Score] ValidateRoundResults — checking {all.Length} objects");
+
+        foreach (PickableObject obj in all)
+        {
+            Debug.Log($"[Score] {obj.name} | wasDropped={obj.wasDropped} | owningPlayer={obj.owningPlayerIndex} | scored={obj.scoredThisRound}");
+
+            if (!obj.wasDropped) continue;
+            if (obj.scoredThisRound) continue;
+            if (obj.owningPlayerIndex < 0) continue;
+
+            MemoryObjectID id = obj.GetComponent<MemoryObjectID>();
+            if (id == null) { Debug.Log($"[Score] {obj.name} has no MemoryObjectID — skipped"); continue; }
+
+            Transform correctSpawn = GetCorrectSpawnForObject(id.objectID);
+            if (correctSpawn == null) { Debug.Log($"[Score] {id.objectID} has no correct spawn (impostor?) — skipped"); continue; }
+
+            float xzDist = Vector2.Distance(
+                new Vector2(obj.droppedPosition.x, obj.droppedPosition.z),
+                new Vector2(correctSpawn.position.x, correctSpawn.position.z)
+            );
+
+            int points = ScoreManager.Instance != null ? ScoreManager.Instance.CalculateScore(xzDist) : 0;
+
+            if (ScoreManager.Instance != null)
+                ScoreManager.Instance.AddScore(obj.owningPlayerIndex, points);
+
+            obj.scoredThisRound = true;
+
+            Debug.Log($"[Score] {id.objectID} | dist {xzDist:F2}m | {points} pts → P{obj.owningPlayerIndex + 1}");
+        }
+    }
+
+    void EndMatch()
+    {
+        currentState = GameState.RoundFinished;
+        Time.timeScale = 0f;
+
+        if (ScoreManager.Instance == null || winnerScreen == null) return;
+
+        int[] scores = ScoreManager.Instance.GetAllScores();
+        int winner = -1;
+        if (scores[0] > scores[1]) winner = 0;
+        else if (scores[1] > scores[0]) winner = 1;
+
+        winnerScreen.ShowWinner(winner, scores);
+    }
+
+    int GetMaxRounds() => currentMode == GameMode.QuickMatch ? 3 : 10;
+
+    void ClearAllDropZones()
+    {
+        if (allDropZones == null) return;
+        foreach (DropZone zone in allDropZones)
+            if (zone != null) zone.ClearZone();
+    }
+
+    void ResetAllPickableObjectStates()
+    {
+        PickableObject[] all = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
+        foreach (PickableObject obj in all)
+            obj.ResetRoundState();
+
+        for (int i = 0; i < PickableObject.MaxPlayers; i++)
+        {
+            PickableObject.playerCarrying[i] = false;
+            PickableObject.playerPickupBlockedUntil[i] = 0f;
+        }
+    }
+
+    // ─── Difficulty ──────────────────────────────────────────────────────────
 
     int GetObjectsForCurrentRound()
     {
         if (currentRound <= 5)
             return Mathf.Min(2 + currentRound, maxObjects);
-
         return Mathf.Min(7 + (currentRound - 5), maxObjects);
     }
 
@@ -166,7 +315,6 @@ public class GameManager : MonoBehaviour
     {
         if (currentRound <= 5)
             return 7f + currentRound;
-
         return Mathf.Min(12f + (currentRound - 5), 15f);
     }
 
@@ -174,29 +322,26 @@ public class GameManager : MonoBehaviour
     {
         if (currentRound <= 5)
             return 20f + (currentRound * 5f);
-
         return Mathf.Min(45f + ((currentRound - 5) * 5f), 60f);
     }
 
     int GetImpostorsForCurrentRound()
     {
-        if (currentRound < 6)
-            return 0;
-
+        if (currentRound < 6) return 0;
         return Mathf.Min(currentRound - 5, maxImpostors);
     }
+
+    // ─── Object management ───────────────────────────────────────────────────
 
     void SelectObjectsForRound(int amount)
     {
         selectedObjectIDs.Clear();
-
         List<GameObject> availablePrefabs = new List<GameObject>(memoryObjectPrefabs);
 
         for (int i = 0; i < amount && availablePrefabs.Count > 0; i++)
         {
             int randomIndex = Random.Range(0, availablePrefabs.Count);
             GameObject selectedPrefab = availablePrefabs[randomIndex];
-
             MemoryObjectID id = selectedPrefab.GetComponent<MemoryObjectID>();
 
             if (id == null)
@@ -219,7 +364,6 @@ public class GameManager : MonoBehaviour
         foreach (string objectID in selectedObjectIDs)
         {
             GameObject prefab = FindMemoryPrefabByID(objectID);
-
             if (prefab == null)
             {
                 Debug.LogWarning("No memory prefab found for ID: " + objectID);
@@ -235,17 +379,10 @@ public class GameManager : MonoBehaviour
             int spawnIndex = Random.Range(0, availableSpawns.Count);
             Transform spawn = availableSpawns[spawnIndex];
 
-            GameObject obj = Instantiate(
-                prefab,
-                Vector3.zero,
-                spawn.rotation,
-                originalObjectsParent
-            );
-
+            GameObject obj = Instantiate(prefab, Vector3.zero, spawn.rotation, originalObjectsParent);
             obj.name = prefab.name;
 
             Transform pickupReference = FindPickupObjectByID(objectID);
-
             if (pickupReference != null)
             {
                 obj.transform.rotation = pickupReference.rotation;
@@ -253,7 +390,6 @@ public class GameManager : MonoBehaviour
             }
 
             GroundPoint groundPoint = obj.GetComponentInChildren<GroundPoint>();
-
             if (groundPoint != null)
             {
                 Vector3 correction = spawn.position - groundPoint.transform.position;
@@ -265,7 +401,6 @@ public class GameManager : MonoBehaviour
             }
 
             correctSpawnByObjectID[objectID] = spawn;
-
             Debug.Log("Object " + objectID + " appeared at spawn " + spawn.name);
 
             spawnedMemoryObjects.Add(obj);
@@ -277,25 +412,18 @@ public class GameManager : MonoBehaviour
     {
         if (correctSpawnByObjectID.TryGetValue(objectID, out Transform spawn))
             return spawn;
-
         return null;
     }
 
-    public bool WasObjectSelectedThisRound(string objectID)
-    {
-        return selectedObjectIDs.Contains(objectID);
-    }
+    public bool WasObjectSelectedThisRound(string objectID) => selectedObjectIDs.Contains(objectID);
 
     GameObject FindMemoryPrefabByID(string objectID)
     {
         foreach (GameObject prefab in memoryObjectPrefabs)
         {
             MemoryObjectID id = prefab.GetComponent<MemoryObjectID>();
-
-            if (id != null && id.objectID == objectID)
-                return prefab;
+            if (id != null && id.objectID == objectID) return prefab;
         }
-
         return null;
     }
 
@@ -304,11 +432,8 @@ public class GameManager : MonoBehaviour
         foreach (Transform child in pickupObjectsParent)
         {
             MemoryObjectID id = child.GetComponent<MemoryObjectID>();
-
-            if (id != null && id.objectID == objectID)
-                return child;
+            if (id != null && id.objectID == objectID) return child;
         }
-
         return null;
     }
 
@@ -317,7 +442,6 @@ public class GameManager : MonoBehaviour
         foreach (Transform child in pickupObjectsParent)
         {
             MemoryObjectID id = child.GetComponent<MemoryObjectID>();
-
             if (id != null && selectedObjectIDs.Contains(id.objectID))
                 child.gameObject.SetActive(true);
         }
@@ -328,21 +452,16 @@ public class GameManager : MonoBehaviour
         if (amount <= 0) return;
 
         List<Transform> availableImpostors = new List<Transform>();
-
         foreach (Transform child in pickupObjectsParent)
         {
             MemoryObjectID id = child.GetComponent<MemoryObjectID>();
-
             if (id != null && !selectedObjectIDs.Contains(id.objectID))
-            {
                 availableImpostors.Add(child);
-            }
         }
 
         for (int i = 0; i < amount && availableImpostors.Count > 0; i++)
         {
             int randomIndex = Random.Range(0, availableImpostors.Count);
-
             availableImpostors[randomIndex].gameObject.SetActive(true);
             availableImpostors.RemoveAt(randomIndex);
         }
@@ -350,46 +469,36 @@ public class GameManager : MonoBehaviour
 
     void ShowAllPickupObjects()
     {
-        PickableObject.objectAlreadyCarried = false;
+        for (int i = 0; i < PickableObject.MaxPlayers; i++)
+        {
+            PickableObject.playerCarrying[i] = false;
+            PickableObject.playerPickupBlockedUntil[i] = 0f;
+        }
 
         foreach (Transform child in pickupObjectsParent)
-        {
             child.gameObject.SetActive(true);
-        }
     }
 
     void DisableAllPickupObjects()
     {
-        PickableObject[] allPickables = Object.FindObjectsByType<PickableObject>(
-            FindObjectsSortMode.None
-        );
-
+        PickableObject[] allPickables = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
         foreach (PickableObject pickable in allPickables)
-        {
             pickable.ForceDisappear();
-        }
 
         foreach (Transform child in pickupObjectsParent)
-        {
             child.gameObject.SetActive(false);
-        }
     }
 
     void HideMemoryObjects()
     {
         foreach (GameObject obj in spawnedMemoryObjects)
-        {
             obj.SetActive(false);
-        }
     }
 
     void ClearRound()
     {
         foreach (GameObject obj in spawnedMemoryObjects)
-        {
-            if (obj != null)
-                Destroy(obj);
-        }
+            if (obj != null) Destroy(obj);
 
         spawnedMemoryObjects.Clear();
         selectedObjectIDs.Clear();
