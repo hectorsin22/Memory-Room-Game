@@ -2,20 +2,72 @@
 
 ## About the Project
 
-MEMORY ROOM is a Unity VR prototype focused on memory and object interaction inside an immersive environment. The main idea of the game is that the player must observe and remember different objects placed around the room and later interact with them through VR mechanics.
+MEMORY ROOM is a memory and reconstruction game built around physical movement inside a shared room. Players are shown a set of objects arranged in the space, have to **memorize what appeared and where**, and then **rebuild that arrangement** by walking to the objects and picking them up — without controllers, just by moving and crouching in real space.
 
-The project is currently in an early prototype phase, so the gameplay loop is still simplified for testing purposes. Right now, when the game starts, the player has 7 seconds to memorize all the objects placed in front of them. This temporary mechanic is used to test the memory aspect of the game and the interaction flow.
+The whole experience is designed for multiple players at once and is meant to be played by physically walking around, not with a headset or a gamepad. (Technically it runs as a projected, body-tracked installation, but the focus of the project is the game itself and how it plays.)
 
-After the memorization phase ends, the player can move around the environment and pick up objects using the current VR interaction system. At the moment, any object can be grabbed by moving over it and interacting with it. Objects can also temporarily be dropped using the **E** key while testing inside the Unity editor. This is only a debug control for desktop testing and will later be replaced by a more natural VR system based on the height and movement of the controllers/sensors.
+## The Game
 
-The prototype already includes functional object pickup mechanics, temporary dropping, chest opening animations, sound integration support, and the first version of the gameplay flow structure.
+### Game flow
 
-## Current State
+The game runs as a continuous loop of rounds, managed by a state machine with four phases:
 
-The current version of the project is mainly focused on testing and validating the core mechanics of the game. The objective right now is to make sure that object interaction, grabbing systems, chest interactions, and the memory phase work correctly before expanding the project further. Most systems are still being developed and improved, but the prototype is already fully playable for testing the basic gameplay concept.
+**Menu → Memorize → Reconstruction → Round Finished → (next round)**
+
+1. **Menu** — Players start in a dimly lit room. There is no UI to click: navigation is physical. Walking into a marked floor zone starts the game; another zone quits it.
+2. **Memorize** — A set of objects appears at fixed positions around the room. Players have a limited time to memorize *which* objects appeared and *where* each one was.
+3. **Reconstruction** — The objects vanish, the chest opens, and the matching objects become available to grab. Players must walk to the correct objects and place/carry them to rebuild the original arrangement from memory.
+4. **Round Finished** — Short pause, the difficulty steps up, and the next round begins.
+
+### Difficulty progression
+
+Each round is harder than the last. The game scales several things automatically as rounds advance:
+
+- **More objects to remember** — starts small and grows round by round, up to a cap.
+- **Tighter timing** — memorization and reconstruction windows change with the round, balancing pressure against fairness.
+- **Impostor objects** — from round 6 onward, extra "wrong" objects are mixed into the available pool, so players can no longer just grab everything; they have to remember which objects actually belonged to the arrangement. The number of impostors grows with the round, up to a cap.
+
+This progression is what turns a simple "look and remember" exercise into an escalating memory challenge.
+
+### How players interact
+
+Interaction is entirely physical and based on the player's body:
+
+- **Pick up** — crouch down while standing over an object. The object is then carried with the player.
+- **Drop** — stand back up and crouch again to release it.
+- Only **one object can be carried at a time**, and there's a short cooldown after dropping so objects aren't grabbed again by accident.
+
+This crouch-to-grab / crouch-to-drop design is the core of the gameplay feel — it makes picking things up a deliberate, physical act rather than a button press.
+
+### Objects, spawns and the chest
+
+- Every object has a unique identity, so the game can tell apart the version shown during memorization, the version players grab during reconstruction, and the spawn point where it originally appeared.
+- Memory objects spawn at fixed points and are aligned to the ground so they always sit naturally in the room.
+- The **chest** acts as a visual cue for the game state: closed during memorization, opening when the reconstruction phase begins (with supporting sound).
+
+## Current State of Development
+
+The game is a working, playable prototype. The full gameplay structure is already in place:
+
+- ✅ Complete round loop (menu, memorize, reconstruct, round transitions)
+- ✅ Physical, crouch-based pickup and drop
+- ✅ Multi-player support — several people can play in the same room at once
+- ✅ Automatic difficulty scaling (object count, timing)
+- ✅ Impostor objects from round 6 to increase challenge
+- ✅ Physical menu navigation by walking into zones
+- ✅ Chest open/close animation and sound cues
+- ✅ Object identity / spawn-tracking system
+
+### What's being worked on
+
+- Tuning the **difficulty curve** (how fast objects, impostors and timers ramp up) so the challenge feels fair.
+- Polishing the **interaction feel** of picking up and dropping.
+- Adding more **content** (objects and arrangements) and refining the round-to-round experience.
+
+> A temporary keyboard control (**E** to drop) exists only for testing in the editor and will be removed; the real game is played entirely through movement.
 
 ## Final Goal
 
-The final objective of MEMORY ROOM is to become a complete VR memory and puzzle experience centered around immersion and natural interaction. The project aims to evolve into a more advanced experience with progressive difficulty, more complex memory challenges, physics-based interactions, environmental storytelling, and fully gesture-based mechanics adapted specifically for virtual reality. The final version will remove temporary debug controls and replace them with fully immersive VR interactions.
+The final objective of MEMORY ROOM is a polished, multi-player memory game driven entirely by natural movement: progressive difficulty, richer and trickier memory challenges, and fully physical, controller-free interaction from start to finish.
 
 
