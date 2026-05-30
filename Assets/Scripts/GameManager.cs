@@ -227,14 +227,14 @@ public class GameManager : MonoBehaviour
         }
 
         currentState = GameState.Reconstruction;
-        if (hud != null) hud.UpdatePhase("Place them back!");
-
         HideMemoryObjects();
         ActivateSelectedPickupObjects();
         ActivateImpostorPickupObjects(impostorsThisRound);
-
         if (chest != null) chest.OpenChestInstant();
 
+        if (hud != null) hud.UpdatePhase("PLACE THEM BACK");
+        yield return new WaitForSeconds(2f);
+        if (hud != null) hud.UpdatePhase("");
         timeLeft = reconstructionTime;
         while (timeLeft > 0f)
         {
@@ -253,6 +253,12 @@ public class GameManager : MonoBehaviour
         if (hud != null) hud.UpdateTimer(0);
 
         ValidateRoundResults();
+
+        // Reveal correct positions
+        foreach (GameObject obj in spawnedMemoryObjects)
+            if (obj != null) obj.SetActive(true);
+
+        if (hud != null) hud.UpdatePhase("HOW CLOSE?");
     }
 
     void ValidateRoundResults()

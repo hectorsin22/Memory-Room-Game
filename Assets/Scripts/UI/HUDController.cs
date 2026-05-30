@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -10,18 +11,16 @@ public class HUDController : MonoBehaviour
     [Header("Center")]
     public TMP_Text timerText;
     public TMP_Text phaseText;
+    public TMP_Text roundText;
+
+    private float currentTimerSeconds;
 
     void Start()
     {
-        UpdateScore(0, 0);
-        UpdateScore(1, 0);
+        SetScoresVisible(false);
 
         if (ScoreManager.Instance != null)
-        {
             ScoreManager.Instance.OnScoreChanged += UpdateScore;
-            UpdateScore(0, ScoreManager.Instance.GetScore(0));
-            UpdateScore(1, ScoreManager.Instance.GetScore(1));
-        }
     }
 
     void OnDisable()
@@ -30,25 +29,70 @@ public class HUDController : MonoBehaviour
             ScoreManager.Instance.OnScoreChanged -= UpdateScore;
     }
 
+    void Update()
+    {
+        if (timerText == null) return;
+
+        if (currentTimerSeconds > 0f && currentTimerSeconds <= 10f)
+        {
+            float flash = Mathf.PingPong(Time.time * 4f, 1f);
+            timerText.color = new Color(1f, flash * 0.2f, flash * 0.2f);
+        }
+        else
+        {
+            timerText.color = Color.white;
+        }
+    }
+
+    public void SetScoresVisible(bool visible)
+    {
+        if (player1ScoreText != null) player1ScoreText.gameObject.SetActive(visible);
+        if (player2ScoreText != null) player2ScoreText.gameObject.SetActive(visible);
+    }
+
     public void UpdateScore(int playerIndex, int score)
     {
-        if (playerIndex == 0 && player1ScoreText != null)
-            player1ScoreText.text = score.ToString();
-        else if (playerIndex == 1 && player2ScoreText != null)
-            player2ScoreText.text = score.ToString();
+        TMP_Text target = playerIndex == 0 ? player1ScoreText : player2ScoreText;
+        if (target == null) return;
+        target.text = score.ToString();
+        StartCoroutine(PunchScale(target.transform));
     }
 
     public void UpdateTimer(float seconds)
     {
+        currentTimerSeconds = seconds;
         if (timerText == null) return;
-
         int s = Mathf.CeilToInt(Mathf.Max(seconds, 0f));
-        timerText.text = s > 0 ? s + "s" : "";
+        timerText.text = s > 0 ? s.ToString() : "";
     }
 
     public void UpdatePhase(string phaseName)
     {
         if (phaseText != null)
             phaseText.text = phaseName;
+    }
+
+    public void UpdateRound(int round, int maxRounds)
+    {
+        if (roundText != null)
+            roundText.text = $"Round {round}/{maxRounds}";
+    }
+
+    private IEnumerator PunchScale(Transform t)
+    {
+        Vector3 original = t.localScale;
+        float duration = 0.35f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float progress = elapsed / duration;
+            float scale = 1f + Mathf.Sin(progress * Mathf.PI) * 0.6f;
+            t.localScale = original * scale;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        t.localScale = original;
     }
 }
