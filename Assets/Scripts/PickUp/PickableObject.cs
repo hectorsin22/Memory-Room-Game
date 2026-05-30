@@ -17,6 +17,11 @@ public class PickableObject : MonoBehaviour
     public float carriedObjectHeight = 0.2f;
     public Vector2 carryOffsetXZ = Vector2.zero;
 
+    [Header("Audio")]
+    private AudioSource audioSource;
+    public AudioClip pickupSound;
+    public AudioClip dropSound;
+
     // -1 = unclaimed. Set permanently on first pickup for this round.
     public int owningPlayerIndex = -1;
 
@@ -40,7 +45,11 @@ public class PickableObject : MonoBehaviour
         originalPosition = transform.position;
         originalRotation = transform.rotation;
         originalParent = transform.parent;
+
         carriedObjectHeight = transform.position.y;
+
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -78,27 +87,38 @@ public class PickableObject : MonoBehaviour
     {
         // Only allow pickup during reconstruction phase
         if (GameManager.Instance == null) return;
-        if (GameManager.Instance.currentState != GameManager.GameState.Reconstruction) return;
+
+        if (GameManager.Instance.currentState != GameManager.GameState.Reconstruction)
+            return;
 
         PlayerMovement pm = player.GetComponent<PlayerMovement>();
-        if (pm == null) return;
+
+        if (pm == null)
+            return;
 
         int playerIndex = pm.playerIndex;
-        if (playerIndex < 0 || playerIndex >= MaxPlayers) return;
+
+        if (playerIndex < 0 || playerIndex >= MaxPlayers)
+            return;
 
         // Player must be crouching
-        if (player.position.y > crouchHeight) return;
+        if (player.position.y > crouchHeight)
+            return;
 
         // Per-player cooldown
-        if (Time.time < playerPickupBlockedUntil[playerIndex]) return;
+        if (Time.time < playerPickupBlockedUntil[playerIndex])
+            return;
 
-        if (isBeingCarried) return;
+        if (isBeingCarried)
+            return;
 
         // Per-player carry limit (one object per player at a time)
-        if (playerCarrying[playerIndex]) return;
+        if (playerCarrying[playerIndex])
+            return;
 
         // Ownership check: unclaimed or already owned by this player
-        if (owningPlayerIndex != -1 && owningPlayerIndex != playerIndex) return;
+        if (owningPlayerIndex != -1 && owningPlayerIndex != playerIndex)
+            return;
 
         // Claim ownership permanently for this round
         if (owningPlayerIndex == -1)
@@ -115,29 +135,40 @@ public class PickableObject : MonoBehaviour
         playerCarrying[playerIndex] = true;
 
         carrier = player;
+
         carriedObjectHeight = transform.position.y;
         carriedRotation = transform.rotation;
+
         playerStoodUpAfterPickup = false;
+
+        PlaySound(pickupSound, 20f);
     }
 
     public void Drop()
     {
-        if (!isBeingCarried) return;
+        if (!isBeingCarried)
+            return;
 
         isBeingCarried = false;
 
         if (owningPlayerIndex >= 0 && owningPlayerIndex < MaxPlayers)
         {
             playerCarrying[owningPlayerIndex] = false;
-            playerPickupBlockedUntil[owningPlayerIndex] = Time.time + pickupCooldownAfterDrop;
+
+            playerPickupBlockedUntil[owningPlayerIndex] =
+                Time.time + pickupCooldownAfterDrop;
+
             // Record where this object landed for scoring at round end
             droppedPosition = transform.position;
             wasDropped = true;
         }
 
         transform.SetParent(originalParent, true);
+
         carrier = null;
         playerStoodUpAfterPickup = false;
+
+        PlaySound(dropSound, 0.8f);
     }
 
     // Called by GameManager at the start of each round to reset all per-round state
@@ -158,20 +189,32 @@ public class PickableObject : MonoBehaviour
                 playerCarrying[owningPlayerIndex] = false;
 
             isBeingCarried = false;
+
             carrier = null;
             playerStoodUpAfterPickup = false;
         }
 
         transform.SetParent(originalParent, true);
+
         transform.position = originalPosition;
         transform.rotation = originalRotation;
+
         gameObject.SetActive(false);
     }
 
     public void ReturnToOriginalPosition()
     {
         Drop();
+
         transform.position = originalPosition;
         transform.rotation = originalRotation;
+    }
+
+    private void PlaySound(AudioClip clip, float volume)
+    {
+        if (audioSource == null || clip == null)
+            return;
+
+        audioSource.PlayOneShot(clip, volume);
     }
 }
