@@ -110,8 +110,7 @@ public class GameManager : MonoBehaviour
         {
             hud.UpdatePhase("");
             hud.UpdateTimer(0);
-            hud.UpdateScore(0, 0);
-            hud.UpdateScore(1, 0);
+            hud.SetScoresVisible(false);
         }
     }
 
@@ -132,6 +131,7 @@ public class GameManager : MonoBehaviour
 
         if (hud != null)
         {
+            hud.SetScoresVisible(true);
             hud.UpdateScore(0, 0);
             hud.UpdateScore(1, 0);
         }
@@ -169,9 +169,11 @@ public class GameManager : MonoBehaviour
             yield return StartCoroutine(StartRound());
 
             currentState = GameState.RoundFinished;
-            if (hud != null) hud.UpdatePhase("Round finished!");
+            if (hud != null) hud.UpdatePhase("ROUND FINISHED");
+            yield return new WaitForSeconds(2f);
+            if (hud != null) hud.UpdatePhase("");
 
-            yield return new WaitForSeconds(timeBetweenRounds);
+            yield return new WaitForSeconds(Mathf.Max(0f, timeBetweenRounds - 2f));
 
             currentRound++;
         }
@@ -183,13 +185,8 @@ public class GameManager : MonoBehaviour
     {
         ClearAllDropZones();
         ResetAllPickableObjectStates();
-
-        currentState = GameState.Memorize;
-        if (hud != null) hud.UpdatePhase("Memorize the objects!");
-
         ClearRound();
         DisableAllPickupObjects();
-
         if (chest != null) chest.CloseChest();
 
         int objectsThisRound = GetObjectsForCurrentRound();
@@ -211,6 +208,21 @@ public class GameManager : MonoBehaviour
         SelectObjectsForRound(objectsThisRound);
         SpawnMemoryObjects();
 
+        // Round announcement
+        currentState = GameState.Memorize;
+        if (hud != null)
+        {
+            hud.UpdatePhase($"ROUND {currentRound}");
+            hud.UpdateRound(currentRound, GetMaxRounds());
+            hud.UpdateTimer(0);
+        }
+        yield return new WaitForSeconds(2f);
+
+        if (hud != null) hud.UpdatePhase("MEMORIZE");
+        yield return new WaitForSeconds(2f);
+        if (hud != null) hud.UpdatePhase("");
+
+        // Memorize countdown
         float timeLeft = memorizeTime;
         while (timeLeft > 0f)
         {
@@ -235,6 +247,8 @@ public class GameManager : MonoBehaviour
         if (hud != null) hud.UpdatePhase("PLACE THEM BACK");
         yield return new WaitForSeconds(2f);
         if (hud != null) hud.UpdatePhase("");
+
+        // Reconstruction countdown
         timeLeft = reconstructionTime;
         while (timeLeft > 0f)
         {
@@ -259,6 +273,11 @@ public class GameManager : MonoBehaviour
             if (obj != null) obj.SetActive(true);
 
         if (hud != null) hud.UpdatePhase("HOW CLOSE?");
+        yield return new WaitForSeconds(3f);
+        if (hud != null) hud.UpdatePhase("");
+
+        foreach (GameObject obj in spawnedMemoryObjects)
+            if (obj != null) obj.SetActive(false);
     }
 
     void ValidateRoundResults()
