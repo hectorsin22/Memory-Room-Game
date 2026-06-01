@@ -141,7 +141,7 @@ public class PickableObject : MonoBehaviour
 
         playerStoodUpAfterPickup = false;
 
-        PlaySound(pickupSound, 20f);
+        PlaySound(pickupSound, 2f);
     }
 
     public void Drop()

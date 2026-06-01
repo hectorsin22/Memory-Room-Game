@@ -19,6 +19,10 @@ public class MenuZone : MonoBehaviour
 
     private bool playerWasInside = false;
 
+    [Header("Audio")]
+    public AudioClip buttonSound;
+    public float buttonVolume = 0.5f;
+
     void Update()
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
@@ -52,7 +56,10 @@ public class MenuZone : MonoBehaviour
 
     void ExecuteAction()
     {
+        
         if (gameManager == null) return;
+
+        PlayButtonSound();
 
         switch (action)
         {
@@ -100,5 +107,17 @@ public class MenuZone : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
+    }
+
+    private void PlayButtonSound()
+    {
+        if (buttonSound == null)
+            return;
+
+        AudioSource.PlayClipAtPoint(
+            buttonSound,
+            transform.position,
+            buttonVolume
+        );
     }
 }

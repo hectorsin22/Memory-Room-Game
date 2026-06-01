@@ -74,10 +74,14 @@ public class GameManager : MonoBehaviour
 
     private bool memorizeWarningPlayed = false;
     private bool reconstructionWarningPlayed = false;
+    private bool roundWarningAudioPlaying = false;
 
     private bool isPaused = false;
     private bool finishRoundRequested = false;
     private bool doneAlreadyPressedThisRound = false;
+    private bool roundIsEnding = false;
+    private float reconstructionTimeLeft = 0f;
+
     private GameState stateBeforePause;
 
     void Awake()
@@ -106,7 +110,11 @@ public class GameManager : MonoBehaviour
         currentState = GameState.Menu;
         isPaused = false;
         finishRoundRequested = false;
+        doneAlreadyPressedThisRound = false;
+        roundIsEnding = false;
+        reconstructionTimeLeft = 0f;
 
+        StopRoundAudio();
         ResetMenuZones();
 
         if (menuRoot != null) menuRoot.SetActive(true);
@@ -140,8 +148,12 @@ public class GameManager : MonoBehaviour
 
         isPaused = false;
         finishRoundRequested = false;
+        doneAlreadyPressedThisRound = false;
+        roundIsEnding = false;
+        reconstructionTimeLeft = 0f;
         currentRound = 1;
 
+        StopRoundAudio();
         ResetMenuZones();
 
         if (menuRoot != null) menuRoot.SetActive(false);
@@ -159,6 +171,9 @@ public class GameManager : MonoBehaviour
             hud.UpdateScore(1, 0);
         }
 
+        if (chest != null)
+            chest.EnableCloseSound();
+
         DisableAllPickupObjects();
         UpdateGameplayButtons();
 
@@ -169,11 +184,15 @@ public class GameManager : MonoBehaviour
     {
         if (currentState == GameState.Menu) return;
         if (isPaused) return;
+        if (roundIsEnding) return;
 
         isPaused = true;
         stateBeforePause = currentState;
 
         Time.timeScale = 0f;
+
+        if (roundAudioSource != null && roundAudioSource.isPlaying)
+            roundAudioSource.Pause();
 
         if (pauseMenuRoot != null) pauseMenuRoot.SetActive(true);
         if (pauseButtonRoot != null) pauseButtonRoot.SetActive(false);
@@ -193,6 +212,9 @@ public class GameManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
+        if (roundAudioSource != null && roundWarningAudioPlaying)
+            roundAudioSource.UnPause();
+
         if (pauseMenuRoot != null) pauseMenuRoot.SetActive(false);
         if (mainLight != null) mainLight.intensity = gameplayLightIntensity;
 
@@ -205,9 +227,13 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
 
         StopAllCoroutines();
+        StopRoundAudio();
 
         isPaused = false;
         finishRoundRequested = false;
+        doneAlreadyPressedThisRound = false;
+        roundIsEnding = false;
+        reconstructionTimeLeft = 0f;
         currentRound = 1;
 
         ShowMenu();
@@ -218,6 +244,9 @@ public class GameManager : MonoBehaviour
         if (isPaused) return;
         if (currentState != GameState.Reconstruction) return;
         if (doneAlreadyPressedThisRound) return;
+        if (roundIsEnding) return;
+
+        if (reconstructionTimeLeft <= 1f) return;
 
         doneAlreadyPressedThisRound = true;
         finishRoundRequested = true;
@@ -247,13 +276,7 @@ public class GameManager : MonoBehaviour
             currentState = GameState.RoundFinished;
             UpdateGameplayButtons();
 
-            if (hud != null) hud.UpdatePhase("ROUND FINISHED");
-
-            yield return new WaitForSeconds(2f);
-
-            if (hud != null) hud.UpdatePhase("");
-
-            yield return new WaitForSeconds(Mathf.Max(0f, timeBetweenRounds - 2f));
+            yield return new WaitForSeconds(timeBetweenRounds);
 
             currentRound++;
         }
@@ -265,6 +288,10 @@ public class GameManager : MonoBehaviour
     {
         finishRoundRequested = false;
         doneAlreadyPressedThisRound = false;
+        roundIsEnding = false;
+        reconstructionTimeLeft = 0f;
+
+        StopRoundAudio();
 
         ClearAllDropZones();
         ResetAllPickableObjectStates();
@@ -280,14 +307,6 @@ public class GameManager : MonoBehaviour
 
         memorizeWarningPlayed = false;
         reconstructionWarningPlayed = false;
-
-        Debug.Log(
-            "Round " + currentRound +
-            " | Objects: " + objectsThisRound +
-            " | Memorize: " + memorizeTime +
-            " | Reconstruction: " + reconstructionTime +
-            " | Impostors: " + impostorsThisRound
-        );
 
         SelectObjectsForRound(objectsThisRound);
         SpawnMemoryObjects();
@@ -314,6 +333,12 @@ public class GameManager : MonoBehaviour
 
         while (timeLeft > 0f)
         {
+            if (isPaused)
+            {
+                yield return null;
+                continue;
+            }
+
             if (!memorizeWarningPlayed && timeLeft <= 3f)
             {
                 memorizeWarningPlayed = true;
@@ -325,6 +350,8 @@ public class GameManager : MonoBehaviour
             timeLeft -= Time.deltaTime;
             yield return null;
         }
+
+        StopRoundAudio();
 
         currentState = GameState.Reconstruction;
         UpdateGameplayButtons();
@@ -345,6 +372,14 @@ public class GameManager : MonoBehaviour
 
         while (timeLeft > 0f && !finishRoundRequested)
         {
+            if (isPaused)
+            {
+                yield return null;
+                continue;
+            }
+
+            reconstructionTimeLeft = timeLeft;
+
             if (!reconstructionWarningPlayed && timeLeft <= 10f)
             {
                 reconstructionWarningPlayed = true;
@@ -357,37 +392,35 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        roundIsEnding = true;
+        finishRoundRequested = false;
+
+        StopRoundAudio();
+
         if (hud != null) hud.UpdateTimer(0);
 
         if (doneButtonRoot != null)
             doneButtonRoot.SetActive(false);
 
+        ResetMenuZones();
+
+        ForceDisappearCarriedObjects();
+
         ValidateRoundResults();
 
-        if (finishRoundRequested)
+        if (hud != null)
         {
-            if (hud != null) hud.UpdatePhase("DONE");
-
-            // Keep the placed objects visible for a moment
-            yield return new WaitForSeconds(2f);
-
-            if (hud != null) hud.UpdatePhase("");
+            if (doneAlreadyPressedThisRound)
+                hud.UpdatePhase("DONE");
+            else
+                hud.UpdatePhase("TIME UP");
         }
-        else
-        {
-            // Only reveal correct positions when time runs out naturally
-            foreach (GameObject obj in spawnedMemoryObjects)
-                if (obj != null) obj.SetActive(true);
 
-            if (hud != null) hud.UpdatePhase("HOW CLOSE?");
+        yield return new WaitForSeconds(2f);
 
-            yield return new WaitForSeconds(3f);
+        if (hud != null) hud.UpdatePhase("");
 
-            if (hud != null) hud.UpdatePhase("");
-
-            foreach (GameObject obj in spawnedMemoryObjects)
-                if (obj != null) obj.SetActive(false);
-        }
+        roundIsEnding = false;
     }
 
     void ValidateRoundResults()
@@ -420,10 +453,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void ForceDisappearCarriedObjects()
+    {
+        PickableObject[] all = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
+
+        foreach (PickableObject obj in all)
+        {
+            if (obj != null && obj.isBeingCarried)
+                obj.ForceDisappear();
+        }
+
+        for (int i = 0; i < PickableObject.MaxPlayers; i++)
+        {
+            PickableObject.playerCarrying[i] = false;
+            PickableObject.playerPickupBlockedUntil[i] = 0f;
+        }
+    }
+
     void EndMatch()
     {
         currentState = GameState.RoundFinished;
         UpdateGameplayButtons();
+
+        StopRoundAudio();
 
         Time.timeScale = 0f;
 
@@ -446,13 +498,13 @@ public class GameManager : MonoBehaviour
 
     void UpdateGameplayButtons()
     {
-        bool inGame = currentState != GameState.Menu && !isPaused;
+        bool inGame = currentState != GameState.Menu && !isPaused && !roundIsEnding;
 
         if (pauseButtonRoot != null)
             pauseButtonRoot.SetActive(inGame);
 
         if (doneButtonRoot != null)
-            doneButtonRoot.SetActive(currentState == GameState.Reconstruction && !isPaused);
+            doneButtonRoot.SetActive(currentState == GameState.Reconstruction && !isPaused && !roundIsEnding);
     }
 
     void ResetMenuZones()
@@ -495,18 +547,22 @@ public class GameManager : MonoBehaviour
 
     float GetMemorizeTimeForCurrentRound()
     {
-        if (currentRound <= 5)
-            return 7f + currentRound;
+        int objectsThisRound = GetObjectsForCurrentRound();
 
-        return Mathf.Min(12f + (currentRound - 5), 15f);
+        return Mathf.Min(
+            5f + (objectsThisRound * 1.2f),
+            14f
+        );
     }
 
     float GetReconstructionTimeForCurrentRound()
     {
-        if (currentRound <= 5)
-            return 20f + (currentRound * 5f);
+        int objectsThisRound = GetObjectsForCurrentRound();
 
-        return Mathf.Min(45f + ((currentRound - 5) * 5f), 60f);
+        return Mathf.Min(
+            10f + (objectsThisRound * 3f),
+            45f
+        );
     }
 
     int GetImpostorsForCurrentRound()
@@ -703,6 +759,20 @@ public class GameManager : MonoBehaviour
         if (roundAudioSource == null || clip == null)
             return;
 
-        roundAudioSource.PlayOneShot(clip);
+        roundAudioSource.Stop();
+        roundAudioSource.clip = clip;
+        roundAudioSource.loop = false;
+        roundAudioSource.Play();
+
+        roundWarningAudioPlaying = true;
+    }
+
+    private void StopRoundAudio()
+    {
+        if (roundAudioSource == null)
+            return;
+
+        roundAudioSource.Stop();
+        roundWarningAudioPlaying = false;
     }
 }
