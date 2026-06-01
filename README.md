@@ -1,4 +1,4 @@
-# MEMORY ROOM
+# MEMORY ROOM GAME
 
 ## About the Project
 
