@@ -186,14 +186,6 @@ public class GameManager : MonoBehaviour
         DisableAllPickupObjects();
         UpdateGameplayButtons();
 
-        StartCoroutine(InstructionsThenGame());
-    }
-
-    IEnumerator InstructionsThenGame()
-    {
-        if (hud != null) hud.ShowInstructions(true);
-        yield return new WaitForSeconds(8f);
-        if (hud != null) hud.ShowInstructions(false);
         StartCoroutine(RoundLoop());
     }
 
@@ -297,11 +289,8 @@ public class GameManager : MonoBehaviour
 
             currentState = GameState.RoundFinished;
             UpdateGameplayButtons();
-            if (hud != null) hud.UpdatePhase("ROUND FINISHED");
-            yield return new WaitForSeconds(2f);
-            if (hud != null) hud.UpdatePhase("");
 
-            yield return new WaitForSeconds(Mathf.Max(0f, timeBetweenRounds - 2f));
+            yield return new WaitForSeconds(timeBetweenRounds);
 
             currentRound++;
         }
@@ -437,15 +426,6 @@ public class GameManager : MonoBehaviour
         ForceDisappearCarriedObjects();
 
         ValidateRoundResults();
-
-        foreach (GameObject obj in spawnedMemoryObjects)
-            if (obj != null) obj.SetActive(true);
-
-        if (hud != null) hud.UpdatePhase("HOW CLOSE?");
-        yield return new WaitForSeconds(3f);
-
-        foreach (GameObject obj in spawnedMemoryObjects)
-            if (obj != null) obj.SetActive(false);
 
         if (hud != null)
         {
