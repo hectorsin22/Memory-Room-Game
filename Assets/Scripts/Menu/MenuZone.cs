@@ -23,6 +23,7 @@ public class MenuZone : MonoBehaviour
     public GameObject linkedOptionRoot;
 
     [Header("Audio")]
+    public AudioSource buttonAudioSource;
     public AudioClip buttonSound;
     public float buttonVolume = 0.6f;
 
@@ -111,14 +112,10 @@ public class MenuZone : MonoBehaviour
 
     private void PlayButtonSound()
     {
-        if (buttonSound == null)
+        if (buttonAudioSource == null || buttonSound == null)
             return;
 
-        AudioSource.PlayClipAtPoint(
-            buttonSound,
-            transform.position,
-            buttonVolume
-        );
+        buttonAudioSource.PlayOneShot(buttonSound, buttonVolume);
     }
 
     private void OnDrawGizmos()

@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    // Main states of the game
     public enum GameState
     {
         Menu,
@@ -68,8 +69,13 @@ public class GameManager : MonoBehaviour
     [Header("Menu Zones")]
     public MenuZone[] menuZones;
 
+    // Objects spawned only during the memorization phase
     private readonly List<GameObject> spawnedMemoryObjects = new List<GameObject>();
+
+    // IDs of the objects selected for the current round
     private readonly List<string> selectedObjectIDs = new List<string>();
+
+    // Stores where each object originally appeared
     private readonly Dictionary<string, Transform> correctSpawnByObjectID = new Dictionary<string, Transform>();
 
     private bool memorizeWarningPlayed = false;
@@ -86,6 +92,7 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        // Singleton so other scripts can access the GameManager easily
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -105,6 +112,7 @@ public class GameManager : MonoBehaviour
 
     void ShowMenu()
     {
+        // Reset everything and show the initial menu
         Time.timeScale = 1f;
 
         currentState = GameState.Menu;
@@ -142,6 +150,7 @@ public class GameManager : MonoBehaviour
 
     public void StartGameFromMenu()
     {
+        // Starts a new match from the main menu
         if (currentState != GameState.Menu) return;
 
         Time.timeScale = 1f;
@@ -182,6 +191,7 @@ public class GameManager : MonoBehaviour
 
     public void PauseGame()
     {
+        // Pause the game and show the pause menu
         if (currentState == GameState.Menu) return;
         if (isPaused) return;
         if (roundIsEnding) return;
@@ -205,6 +215,7 @@ public class GameManager : MonoBehaviour
 
     public void ResumeGame()
     {
+        // Continue from where the game was paused
         if (!isPaused) return;
 
         isPaused = false;
@@ -224,6 +235,7 @@ public class GameManager : MonoBehaviour
 
     public void QuitToMainMenu()
     {
+        // Stop the current match and return to the first screen
         Time.timeScale = 1f;
 
         StopAllCoroutines();
@@ -241,6 +253,7 @@ public class GameManager : MonoBehaviour
 
     public void DoneReconstruction()
     {
+        // Allows players to finish the reconstruction phase early
         if (isPaused) return;
         if (currentState != GameState.Reconstruction) return;
         if (doneAlreadyPressedThisRound) return;
@@ -269,6 +282,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RoundLoop()
     {
+        // Main loop: keeps creating rounds until the match ends
         while (currentRound <= GetMaxRounds())
         {
             yield return StartCoroutine(StartRound());
@@ -286,6 +300,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartRound()
     {
+        // Controls the full flow of one round
         finishRoundRequested = false;
         doneAlreadyPressedThisRound = false;
         roundIsEnding = false;
@@ -311,6 +326,7 @@ public class GameManager : MonoBehaviour
         SelectObjectsForRound(objectsThisRound);
         SpawnMemoryObjects();
 
+        // Memorization phase
         currentState = GameState.Memorize;
         UpdateGameplayButtons();
 
@@ -331,6 +347,7 @@ public class GameManager : MonoBehaviour
 
         float timeLeft = memorizeTime;
 
+        // Countdown while players memorize the objects
         while (timeLeft > 0f)
         {
             if (isPaused)
@@ -353,6 +370,7 @@ public class GameManager : MonoBehaviour
 
         StopRoundAudio();
 
+        // Reconstruction phase
         currentState = GameState.Reconstruction;
         UpdateGameplayButtons();
 
@@ -370,6 +388,7 @@ public class GameManager : MonoBehaviour
 
         timeLeft = reconstructionTime;
 
+        // Countdown while players place the objects
         while (timeLeft > 0f && !finishRoundRequested)
         {
             if (isPaused)
@@ -425,6 +444,7 @@ public class GameManager : MonoBehaviour
 
     void ValidateRoundResults()
     {
+        // Compare placed objects with their correct positions and add points
         PickableObject[] all = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
 
         foreach (PickableObject obj in all)
@@ -455,6 +475,7 @@ public class GameManager : MonoBehaviour
 
     void ForceDisappearCarriedObjects()
     {
+        // Safety check: removes objects still being carried before changing round
         PickableObject[] all = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
 
         foreach (PickableObject obj in all)
@@ -472,6 +493,7 @@ public class GameManager : MonoBehaviour
 
     void EndMatch()
     {
+        // Calculate the winner and show the final screen
         currentState = GameState.RoundFinished;
         UpdateGameplayButtons();
 
@@ -503,6 +525,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateGameplayButtons()
     {
+        // Shows Pause during the game and Done only during reconstruction
         bool inGame = currentState != GameState.Menu && !isPaused && !roundIsEnding;
 
         if (pauseButtonRoot != null)
@@ -544,6 +567,7 @@ public class GameManager : MonoBehaviour
 
     int GetObjectsForCurrentRound()
     {
+        // More objects appear as rounds progress
         if (currentRound <= 5)
             return Mathf.Min(2 + currentRound, maxObjects);
 
@@ -552,6 +576,7 @@ public class GameManager : MonoBehaviour
 
     float GetMemorizeTimeForCurrentRound()
     {
+        // More objects require more memorization time, but with a limit
         int objectsThisRound = GetObjectsForCurrentRound();
 
         return Mathf.Min(
@@ -562,6 +587,7 @@ public class GameManager : MonoBehaviour
 
     float GetReconstructionTimeForCurrentRound()
     {
+        // More objects require more reconstruction time, but with a limit
         int objectsThisRound = GetObjectsForCurrentRound();
 
         return Mathf.Min(
@@ -572,6 +598,7 @@ public class GameManager : MonoBehaviour
 
     int GetImpostorsForCurrentRound()
     {
+        // Fake objects start appearing in later rounds
         if (currentRound < 6) return 0;
 
         return Mathf.Min(currentRound - 5, maxImpostors);
@@ -579,6 +606,7 @@ public class GameManager : MonoBehaviour
 
     void SelectObjectsForRound(int amount)
     {
+        // Randomly chooses which objects will be used this round
         selectedObjectIDs.Clear();
 
         List<GameObject> availablePrefabs = new List<GameObject>(memoryObjectPrefabs);
@@ -603,6 +631,7 @@ public class GameManager : MonoBehaviour
 
     void SpawnMemoryObjects()
     {
+        // Spawns the selected objects in random positions for memorization
         List<Transform> availableSpawns = new List<Transform>(memorySpawnPoints);
 
         foreach (string objectID in selectedObjectIDs)
@@ -663,6 +692,7 @@ public class GameManager : MonoBehaviour
 
     public bool CanExecuteMenuAction(MenuZone.MenuAction action)
     {
+        // Prevents invisible buttons or wrong-state buttons from working
         switch (action)
         {
             case MenuZone.MenuAction.StartGame:
@@ -717,6 +747,7 @@ public class GameManager : MonoBehaviour
 
     void ActivateSelectedPickupObjects()
     {
+        // Enables only the pickup objects selected for this round
         foreach (Transform child in pickupObjectsParent)
         {
             MemoryObjectID id = child.GetComponent<MemoryObjectID>();
@@ -728,6 +759,7 @@ public class GameManager : MonoBehaviour
 
     void ActivateImpostorPickupObjects(int amount)
     {
+        // Adds fake objects to make the game harder
         if (amount <= 0) return;
 
         List<Transform> availableImpostors = new List<Transform>();
@@ -779,6 +811,7 @@ public class GameManager : MonoBehaviour
 
     void ClearRound()
     {
+        // Removes temporary memory objects from the previous round
         foreach (GameObject obj in spawnedMemoryObjects)
             if (obj != null) Destroy(obj);
 
@@ -789,6 +822,7 @@ public class GameManager : MonoBehaviour
 
     private void PlayRoundSound(AudioClip clip)
     {
+        // Plays countdown warning sounds
         if (roundAudioSource == null || clip == null)
             return;
 
@@ -802,6 +836,7 @@ public class GameManager : MonoBehaviour
 
     private void StopRoundAudio()
     {
+        // Stops countdown audio when changing phase or pausing the match
         if (roundAudioSource == null)
             return;
 
