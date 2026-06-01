@@ -13,6 +13,9 @@ public class HUDController : MonoBehaviour
     public TMP_Text phaseText;
     public TMP_Text roundText;
 
+    [Header("Instructions")]
+    public GameObject instructionsPanel;
+
     private float currentTimerSeconds;
 
     void Start()
@@ -42,6 +45,12 @@ public class HUDController : MonoBehaviour
         {
             timerText.color = Color.white;
         }
+    }
+
+    public void ShowInstructions(bool visible)
+    {
+        if (instructionsPanel != null)
+            instructionsPanel.SetActive(visible);
     }
 
     public void SetScoresVisible(bool visible)
