@@ -14,23 +14,39 @@ public class MenuZone : MonoBehaviour
     public MenuAction action;
     public GameManager gameManager;
 
+    // Size of the invisible area that detects the player
     public Vector2 zoneSize = new Vector2(4f, 2f);
     public string playerTag = "Player";
 
-    private bool playerWasInside = false;
+    [Header("Optional")]
+    // If the visual button is hidden, the zone should not work either
+    public GameObject linkedOptionRoot;
 
     [Header("Audio")]
     public AudioClip buttonSound;
-    public float buttonVolume = 0.5f;
+    public float buttonVolume = 0.6f;
+
+    private bool playerWasInside = false;
 
     void Update()
     {
+        if (gameManager == null) return;
+
+        // Prevent hidden buttons from being triggered
+        if (linkedOptionRoot != null && !linkedOptionRoot.activeInHierarchy)
+            return;
+
+        // Ask the GameManager if this button is allowed right now
+        if (!gameManager.CanExecuteMenuAction(action))
+            return;
+
         GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
 
         bool someoneInside = false;
 
         foreach (GameObject player in players)
         {
+            // Convert the player's position to the local space of this zone
             Vector3 localPos = transform.InverseTransformPoint(player.transform.position);
 
             bool insideX = Mathf.Abs(localPos.x) <= zoneSize.x / 2f;
@@ -40,6 +56,7 @@ public class MenuZone : MonoBehaviour
             {
                 someoneInside = true;
 
+                // Execute only once when the player enters the zone
                 if (!playerWasInside)
                 {
                     playerWasInside = true;
@@ -50,17 +67,19 @@ public class MenuZone : MonoBehaviour
             }
         }
 
+        // Allows the zone to be activated again after the player leaves it
         if (!someoneInside)
             playerWasInside = false;
     }
 
     void ExecuteAction()
     {
-        
         if (gameManager == null) return;
+        if (!gameManager.CanExecuteMenuAction(action)) return;
 
         PlayButtonSound();
 
+        // Each zone calls a different GameManager function depending on its action
         switch (action)
         {
             case MenuAction.StartGame:
@@ -90,8 +109,21 @@ public class MenuZone : MonoBehaviour
         playerWasInside = false;
     }
 
+    private void PlayButtonSound()
+    {
+        if (buttonSound == null)
+            return;
+
+        AudioSource.PlayClipAtPoint(
+            buttonSound,
+            transform.position,
+            buttonVolume
+        );
+    }
+
     private void OnDrawGizmos()
     {
+        // Draws the menu zone in the Scene view so we can place it correctly
         Gizmos.color = Color.green;
 
         Vector3 center = transform.position;
@@ -107,17 +139,5 @@ public class MenuZone : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
-    }
-
-    private void PlayButtonSound()
-    {
-        if (buttonSound == null)
-            return;
-
-        AudioSource.PlayClipAtPoint(
-            buttonSound,
-            transform.position,
-            buttonVolume
-        );
     }
 }

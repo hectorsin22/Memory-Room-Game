@@ -477,9 +477,12 @@ public class GameManager : MonoBehaviour
 
         StopRoundAudio();
 
-        Time.timeScale = 0f;
-
-        if (ScoreManager.Instance == null || winnerScreen == null) return;
+        if (ScoreManager.Instance == null || winnerScreen == null)
+        {
+            Debug.LogWarning("Winner screen or ScoreManager missing. Returning to main menu.");
+            QuitToMainMenu();
+            return;
+        }
 
         int[] scores = ScoreManager.Instance.GetAllScores();
 
@@ -489,6 +492,8 @@ public class GameManager : MonoBehaviour
         else if (scores[1] > scores[0]) winner = 1;
 
         winnerScreen.ShowWinner(winner, scores);
+
+        Time.timeScale = 0f;
     }
 
     int GetMaxRounds()
@@ -654,6 +659,34 @@ public class GameManager : MonoBehaviour
     public bool WasObjectSelectedThisRound(string objectID)
     {
         return selectedObjectIDs.Contains(objectID);
+    }
+
+    public bool CanExecuteMenuAction(MenuZone.MenuAction action)
+    {
+        switch (action)
+        {
+            case MenuZone.MenuAction.StartGame:
+                return currentState == GameState.Menu && !isPaused;
+
+            case MenuZone.MenuAction.PauseGame:
+                return currentState != GameState.Menu && !isPaused && !roundIsEnding;
+
+            case MenuZone.MenuAction.ResumeGame:
+                return isPaused;
+
+            case MenuZone.MenuAction.QuitToMainMenu:
+                return isPaused;
+
+            case MenuZone.MenuAction.Done:
+                return currentState == GameState.Reconstruction &&
+                       !isPaused &&
+                       !roundIsEnding &&
+                       !doneAlreadyPressedThisRound &&
+                       reconstructionTimeLeft > 1f;
+
+            default:
+                return false;
+        }
     }
 
     GameObject FindMemoryPrefabByID(string objectID)
