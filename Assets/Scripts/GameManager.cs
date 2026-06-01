@@ -14,20 +14,21 @@ public class GameManager : MonoBehaviour
         RoundFinished
     }
 
-    public enum GameMode
-    {
-        QuickMatch,
-        NormalMatch
-    }
-
     [Header("State")]
     public GameState currentState;
-    public GameMode currentMode;
     public int currentRound = 1;
+
+    [Header("Match Settings")]
+    public int maxRounds = 3;
 
     [Header("Menu")]
     public GameObject menuRoot;
+    public GameObject pauseMenuRoot;
     public GameObject environmentTitle;
+
+    [Header("Gameplay Buttons")]
+    public GameObject pauseButtonRoot;
+    public GameObject doneButtonRoot;
 
     [Header("Lighting")]
     public Light mainLight;
@@ -64,7 +65,7 @@ public class GameManager : MonoBehaviour
     public HUDController hud;
     public WinnerScreenController winnerScreen;
 
-    [Header("Menu Zones (for reset on restart)")]
+    [Header("Menu Zones")]
     public MenuZone[] menuZones;
 
     private readonly List<GameObject> spawnedMemoryObjects = new List<GameObject>();
@@ -73,6 +74,11 @@ public class GameManager : MonoBehaviour
 
     private bool memorizeWarningPlayed = false;
     private bool reconstructionWarningPlayed = false;
+
+    private bool isPaused = false;
+    private bool finishRoundRequested = false;
+    private bool doneAlreadyPressedThisRound = false;
+    private GameState stateBeforePause;
 
     void Awake()
     {
@@ -95,12 +101,24 @@ public class GameManager : MonoBehaviour
 
     void ShowMenu()
     {
+        Time.timeScale = 1f;
+
         currentState = GameState.Menu;
+        isPaused = false;
+        finishRoundRequested = false;
+
+        ResetMenuZones();
 
         if (menuRoot != null) menuRoot.SetActive(true);
+        if (pauseMenuRoot != null) pauseMenuRoot.SetActive(false);
+        if (pauseButtonRoot != null) pauseButtonRoot.SetActive(false);
+        if (doneButtonRoot != null) doneButtonRoot.SetActive(false);
+
         if (environmentTitle != null) environmentTitle.SetActive(false);
         if (mainLight != null) mainLight.intensity = menuLightIntensity;
 
+        ClearAllDropZones();
+        ResetAllPickableObjectStates();
         ClearRound();
         ShowAllPickupObjects();
 
@@ -114,17 +132,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void StartGameFromMenu(GameMode mode)
+    public void StartGameFromMenu()
     {
         if (currentState != GameState.Menu) return;
 
-        currentMode = mode;
+        Time.timeScale = 1f;
+
+        isPaused = false;
+        finishRoundRequested = false;
+        currentRound = 1;
+
+        ResetMenuZones();
 
         if (menuRoot != null) menuRoot.SetActive(false);
+        if (pauseMenuRoot != null) pauseMenuRoot.SetActive(false);
         if (environmentTitle != null) environmentTitle.SetActive(true);
         if (mainLight != null) mainLight.intensity = gameplayLightIntensity;
-
-        currentRound = 1;
 
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.ResetScores();
@@ -137,12 +160,72 @@ public class GameManager : MonoBehaviour
         }
 
         DisableAllPickupObjects();
+        UpdateGameplayButtons();
+
         StartCoroutine(RoundLoop());
     }
 
-    public void StartGameFromMenu()
+    public void PauseGame()
     {
-        StartGameFromMenu(GameMode.QuickMatch);
+        if (currentState == GameState.Menu) return;
+        if (isPaused) return;
+
+        isPaused = true;
+        stateBeforePause = currentState;
+
+        Time.timeScale = 0f;
+
+        if (pauseMenuRoot != null) pauseMenuRoot.SetActive(true);
+        if (pauseButtonRoot != null) pauseButtonRoot.SetActive(false);
+        if (doneButtonRoot != null) doneButtonRoot.SetActive(false);
+
+        if (mainLight != null) mainLight.intensity = menuLightIntensity;
+
+        ResetMenuZones();
+    }
+
+    public void ResumeGame()
+    {
+        if (!isPaused) return;
+
+        isPaused = false;
+        currentState = stateBeforePause;
+
+        Time.timeScale = 1f;
+
+        if (pauseMenuRoot != null) pauseMenuRoot.SetActive(false);
+        if (mainLight != null) mainLight.intensity = gameplayLightIntensity;
+
+        ResetMenuZones();
+        UpdateGameplayButtons();
+    }
+
+    public void QuitToMainMenu()
+    {
+        Time.timeScale = 1f;
+
+        StopAllCoroutines();
+
+        isPaused = false;
+        finishRoundRequested = false;
+        currentRound = 1;
+
+        ShowMenu();
+    }
+
+    public void DoneReconstruction()
+    {
+        if (isPaused) return;
+        if (currentState != GameState.Reconstruction) return;
+        if (doneAlreadyPressedThisRound) return;
+
+        doneAlreadyPressedThisRound = true;
+        finishRoundRequested = true;
+
+        if (doneButtonRoot != null)
+            doneButtonRoot.SetActive(false);
+
+        ResetMenuZones();
     }
 
     public void QuitGame()
@@ -152,14 +235,7 @@ public class GameManager : MonoBehaviour
 
     public void RestartMatch()
     {
-        Time.timeScale = 1f;
-        StopAllCoroutines();
-        currentRound = 1;
-
-        foreach (MenuZone zone in menuZones)
-            if (zone != null) zone.ResetZone();
-
-        ShowMenu();
+        QuitToMainMenu();
     }
 
     IEnumerator RoundLoop()
@@ -169,8 +245,12 @@ public class GameManager : MonoBehaviour
             yield return StartCoroutine(StartRound());
 
             currentState = GameState.RoundFinished;
+            UpdateGameplayButtons();
+
             if (hud != null) hud.UpdatePhase("ROUND FINISHED");
+
             yield return new WaitForSeconds(2f);
+
             if (hud != null) hud.UpdatePhase("");
 
             yield return new WaitForSeconds(Mathf.Max(0f, timeBetweenRounds - 2f));
@@ -183,10 +263,14 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartRound()
     {
+        finishRoundRequested = false;
+        doneAlreadyPressedThisRound = false;
+
         ClearAllDropZones();
         ResetAllPickableObjectStates();
         ClearRound();
         DisableAllPickupObjects();
+
         if (chest != null) chest.CloseChest();
 
         int objectsThisRound = GetObjectsForCurrentRound();
@@ -208,22 +292,26 @@ public class GameManager : MonoBehaviour
         SelectObjectsForRound(objectsThisRound);
         SpawnMemoryObjects();
 
-        // Round announcement
         currentState = GameState.Memorize;
+        UpdateGameplayButtons();
+
         if (hud != null)
         {
             hud.UpdatePhase($"ROUND {currentRound}");
             hud.UpdateRound(currentRound, GetMaxRounds());
             hud.UpdateTimer(0);
         }
+
         yield return new WaitForSeconds(2f);
 
         if (hud != null) hud.UpdatePhase("MEMORIZE");
+
         yield return new WaitForSeconds(2f);
+
         if (hud != null) hud.UpdatePhase("");
 
-        // Memorize countdown
         float timeLeft = memorizeTime;
+
         while (timeLeft > 0f)
         {
             if (!memorizeWarningPlayed && timeLeft <= 3f)
@@ -239,18 +327,23 @@ public class GameManager : MonoBehaviour
         }
 
         currentState = GameState.Reconstruction;
+        UpdateGameplayButtons();
+
         HideMemoryObjects();
         ActivateSelectedPickupObjects();
         ActivateImpostorPickupObjects(impostorsThisRound);
+
         if (chest != null) chest.OpenChestInstant();
 
         if (hud != null) hud.UpdatePhase("PLACE THEM BACK");
+
         yield return new WaitForSeconds(2f);
+
         if (hud != null) hud.UpdatePhase("");
 
-        // Reconstruction countdown
         timeLeft = reconstructionTime;
-        while (timeLeft > 0f)
+
+        while (timeLeft > 0f && !finishRoundRequested)
         {
             if (!reconstructionWarningPlayed && timeLeft <= 10f)
             {
@@ -266,46 +359,52 @@ public class GameManager : MonoBehaviour
 
         if (hud != null) hud.UpdateTimer(0);
 
+        if (doneButtonRoot != null)
+            doneButtonRoot.SetActive(false);
+
         ValidateRoundResults();
 
-        // Reveal correct positions
-        foreach (GameObject obj in spawnedMemoryObjects)
-            if (obj != null) obj.SetActive(true);
+        if (finishRoundRequested)
+        {
+            if (hud != null) hud.UpdatePhase("DONE");
 
-        if (hud != null) hud.UpdatePhase("HOW CLOSE?");
-        yield return new WaitForSeconds(3f);
-        if (hud != null) hud.UpdatePhase("");
+            // Keep the placed objects visible for a moment
+            yield return new WaitForSeconds(2f);
 
-        foreach (GameObject obj in spawnedMemoryObjects)
-            if (obj != null) obj.SetActive(false);
+            if (hud != null) hud.UpdatePhase("");
+        }
+        else
+        {
+            // Only reveal correct positions when time runs out naturally
+            foreach (GameObject obj in spawnedMemoryObjects)
+                if (obj != null) obj.SetActive(true);
+
+            if (hud != null) hud.UpdatePhase("HOW CLOSE?");
+
+            yield return new WaitForSeconds(3f);
+
+            if (hud != null) hud.UpdatePhase("");
+
+            foreach (GameObject obj in spawnedMemoryObjects)
+                if (obj != null) obj.SetActive(false);
+        }
     }
 
     void ValidateRoundResults()
     {
         PickableObject[] all = Object.FindObjectsByType<PickableObject>(FindObjectsSortMode.None);
-        Debug.Log($"[Score] ValidateRoundResults — checking {all.Length} objects");
 
         foreach (PickableObject obj in all)
         {
-            Debug.Log($"[Score] {obj.name} | wasDropped={obj.wasDropped} | owningPlayer={obj.owningPlayerIndex} | scored={obj.scoredThisRound}");
-
             if (!obj.wasDropped) continue;
             if (obj.scoredThisRound) continue;
             if (obj.owningPlayerIndex < 0) continue;
 
             MemoryObjectID id = obj.GetComponent<MemoryObjectID>();
-            if (id == null)
-            {
-                Debug.Log($"[Score] {obj.name} has no MemoryObjectID — skipped");
-                continue;
-            }
+            if (id == null) continue;
 
             Transform correctSpawn = GetCorrectSpawnForObject(id.objectID);
-            if (correctSpawn == null)
-            {
-                Debug.Log($"[Score] {id.objectID} has no correct spawn (impostor?) — skipped");
-                continue;
-            }
+            if (correctSpawn == null) continue;
 
             float xzDist = Vector2.Distance(
                 new Vector2(obj.droppedPosition.x, obj.droppedPosition.z),
@@ -318,14 +417,14 @@ public class GameManager : MonoBehaviour
                 ScoreManager.Instance.AddScore(obj.owningPlayerIndex, points);
 
             obj.scoredThisRound = true;
-
-            Debug.Log($"[Score] {id.objectID} | dist {xzDist:F2}m | {points} pts → P{obj.owningPlayerIndex + 1}");
         }
     }
 
     void EndMatch()
     {
         currentState = GameState.RoundFinished;
+        UpdateGameplayButtons();
+
         Time.timeScale = 0f;
 
         if (ScoreManager.Instance == null || winnerScreen == null) return;
@@ -333,6 +432,7 @@ public class GameManager : MonoBehaviour
         int[] scores = ScoreManager.Instance.GetAllScores();
 
         int winner = -1;
+
         if (scores[0] > scores[1]) winner = 0;
         else if (scores[1] > scores[0]) winner = 1;
 
@@ -341,7 +441,26 @@ public class GameManager : MonoBehaviour
 
     int GetMaxRounds()
     {
-        return currentMode == GameMode.QuickMatch ? 3 : 10;
+        return maxRounds;
+    }
+
+    void UpdateGameplayButtons()
+    {
+        bool inGame = currentState != GameState.Menu && !isPaused;
+
+        if (pauseButtonRoot != null)
+            pauseButtonRoot.SetActive(inGame);
+
+        if (doneButtonRoot != null)
+            doneButtonRoot.SetActive(currentState == GameState.Reconstruction && !isPaused);
+    }
+
+    void ResetMenuZones()
+    {
+        if (menuZones == null) return;
+
+        foreach (MenuZone zone in menuZones)
+            if (zone != null) zone.ResetZone();
     }
 
     void ClearAllDropZones()
@@ -411,7 +530,6 @@ public class GameManager : MonoBehaviour
 
             if (id == null)
             {
-                Debug.LogWarning(selectedPrefab.name + " has no MemoryObjectID.");
                 availablePrefabs.RemoveAt(randomIndex);
                 i--;
                 continue;
@@ -431,16 +549,10 @@ public class GameManager : MonoBehaviour
             GameObject prefab = FindMemoryPrefabByID(objectID);
 
             if (prefab == null)
-            {
-                Debug.LogWarning("No memory prefab found for ID: " + objectID);
                 continue;
-            }
 
             if (availableSpawns.Count == 0)
-            {
-                Debug.LogWarning("Not enough spawn points.");
                 return;
-            }
 
             int spawnIndex = Random.Range(0, availableSpawns.Count);
             Transform spawn = availableSpawns[spawnIndex];
@@ -469,7 +581,6 @@ public class GameManager : MonoBehaviour
             }
 
             correctSpawnByObjectID[objectID] = spawn;
-            Debug.Log("Object " + objectID + " appeared at spawn " + spawn.name);
 
             spawnedMemoryObjects.Add(obj);
             availableSpawns.RemoveAt(spawnIndex);

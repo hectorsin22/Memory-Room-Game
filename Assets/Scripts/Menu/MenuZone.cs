@@ -5,23 +5,25 @@ public class MenuZone : MonoBehaviour
     public enum MenuAction
     {
         StartGame,
-        QuitGame
+        PauseGame,
+        ResumeGame,
+        QuitToMainMenu,
+        Done
     }
 
     public MenuAction action;
-    public GameManager.GameMode gameMode = GameManager.GameMode.QuickMatch;
     public GameManager gameManager;
 
     public Vector2 zoneSize = new Vector2(4f, 2f);
     public string playerTag = "Player";
 
-    private bool alreadyActivated = false;
+    private bool playerWasInside = false;
 
     void Update()
     {
-        if (alreadyActivated) return;
-
         GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
+
+        bool someoneInside = false;
 
         foreach (GameObject player in players)
         {
@@ -32,27 +34,58 @@ public class MenuZone : MonoBehaviour
 
             if (insideX && insideZ)
             {
-                alreadyActivated = true;
+                someoneInside = true;
 
-                if (action == MenuAction.StartGame)
-                    gameManager.StartGameFromMenu(gameMode);
-
-                if (action == MenuAction.QuitGame)
-                    gameManager.QuitGame();
+                if (!playerWasInside)
+                {
+                    playerWasInside = true;
+                    ExecuteAction();
+                }
 
                 return;
             }
+        }
+
+        if (!someoneInside)
+            playerWasInside = false;
+    }
+
+    void ExecuteAction()
+    {
+        if (gameManager == null) return;
+
+        switch (action)
+        {
+            case MenuAction.StartGame:
+                gameManager.StartGameFromMenu();
+                break;
+
+            case MenuAction.PauseGame:
+                gameManager.PauseGame();
+                break;
+
+            case MenuAction.ResumeGame:
+                gameManager.ResumeGame();
+                break;
+
+            case MenuAction.QuitToMainMenu:
+                gameManager.QuitToMainMenu();
+                break;
+
+            case MenuAction.Done:
+                gameManager.DoneReconstruction();
+                break;
         }
     }
 
     public void ResetZone()
     {
-        alreadyActivated = false;
+        playerWasInside = false;
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = action == MenuAction.StartGame ? Color.green : Color.red;
+        Gizmos.color = Color.green;
 
         Vector3 center = transform.position;
         Vector3 right = transform.right * zoneSize.x / 2f;
@@ -67,10 +100,5 @@ public class MenuZone : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
-
-        // Label the mode in the editor
-#if UNITY_EDITOR
-        UnityEditor.Handles.Label(center, action == MenuAction.StartGame ? gameMode.ToString() : "Quit");
-#endif
     }
 }
